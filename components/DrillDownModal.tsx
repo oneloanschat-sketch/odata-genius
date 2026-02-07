@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { DashboardWidgetConfig, DataPoint } from '../types';
 import { executeODataQuery } from '../services/odataService';
@@ -36,7 +37,7 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
     <div className="fixed inset-0 z-[110] bg-[var(--color-surface-100)] flex flex-col animate-in slide-in-from-bottom duration-500 font-[Heebo]">
       
       {/* Full Screen Header */}
-      <div className="flex justify-between items-center px-6 py-4 bg-[var(--color-surface-glass)] backdrop-blur-md border-b border-[var(--color-border-glass)] shadow-sm shrink-0 z-20">
+      <div className="flex justify-between items-center px-4 md:px-6 py-4 bg-[var(--color-surface-glass)] backdrop-blur-md border-b border-[var(--color-border-glass)] shadow-sm shrink-0 z-20">
           <div className="flex items-center gap-4">
              <button 
                 onClick={onClose} 
@@ -45,11 +46,11 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transform rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
-                <span className="font-medium text-sm">חזרה לדשבורד</span>
+                <span className="font-medium text-sm hidden md:inline">חזרה לדשבורד</span>
              </button>
-             <div className="h-8 w-px bg-[var(--color-border-glass)] mx-2"></div>
+             <div className="h-8 w-px bg-[var(--color-border-glass)] mx-2 hidden md:block"></div>
              <div>
-                <h2 className="text-xl font-extrabold text-[var(--color-text-main)] tracking-tight">
+                <h2 className="text-lg md:text-xl font-extrabold text-[var(--color-text-main)] tracking-tight">
                   Drill Down: <span className="text-[var(--color-primary)]">{config.entity || 'Data View'}</span>
                 </h2>
              </div>
@@ -57,7 +58,7 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
       </div>
       
       {/* Content Area - Fixed Flex Column Layout */}
-      <div className="flex-1 flex flex-col min-h-0 bg-[var(--color-surface-100)] p-6 relative">
+      <div className="flex-1 flex flex-col min-h-0 bg-[var(--color-surface-100)] p-4 md:p-6 relative">
         <div className="flex-1 max-w-7xl mx-auto w-full bg-[var(--color-surface-glass)] backdrop-blur-sm border border-[var(--color-border-glass)] rounded-2xl shadow-sm flex flex-col overflow-hidden">
           {loading ? (
             <div className="flex justify-center items-center h-full">
@@ -75,7 +76,7 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
                 <thead className="bg-[var(--color-surface-200)] sticky top-0 z-10 shadow-sm ring-1 ring-[var(--color-border-glass)]">
                   <tr>
                     {headers.map(h => (
-                      <th key={h} className="px-6 py-4 font-bold text-[var(--color-text-muted)] border-b border-[var(--color-border-glass)] uppercase tracking-wider bg-[var(--color-surface-200)] whitespace-nowrap">
+                      <th key={h} className="px-4 py-3 md:px-6 md:py-4 font-bold text-[var(--color-text-muted)] border-b border-[var(--color-border-glass)] uppercase tracking-wider bg-[var(--color-surface-200)] whitespace-nowrap">
                         {h}
                       </th>
                     ))}
@@ -85,7 +86,7 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
                   {data.map((row, i) => (
                     <tr key={i} className="hover:bg-[var(--color-primary)]/5 transition-colors group">
                       {headers.map(h => (
-                        <td key={`${i}-${h}`} className="px-6 py-3 text-[var(--color-text-main)] whitespace-nowrap group-hover:text-[var(--color-primary)] transition-colors">
+                        <td key={`${i}-${h}`} className="px-4 py-2 md:px-6 md:py-3 text-[var(--color-text-main)] whitespace-nowrap group-hover:text-[var(--color-primary)] transition-colors">
                           {String(row[h])}
                         </td>
                       ))}
@@ -99,7 +100,7 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
         
         <div className="max-w-7xl mx-auto w-full mt-4 text-xs text-[var(--color-text-muted)] flex justify-between px-2 font-mono opacity-70">
            <span>מציג עד 50 רשומות ראשונות</span>
-           <span>מקור: {baseUrl}</span>
+           <span className="hidden md:inline">מקור: {baseUrl}</span>
         </div>
       </div>
     </div>

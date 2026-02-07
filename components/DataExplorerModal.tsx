@@ -78,8 +78,8 @@ export const DataExplorerModal: React.FC<DataExplorerModalProps> = ({ isOpen, on
     <div className="fixed inset-0 z-[100] bg-[var(--color-surface-100)] flex flex-col animate-in slide-in-from-bottom duration-500 font-[Heebo]">
         
         {/* Full Screen Header */}
-        <div className="flex justify-between items-center px-6 py-4 bg-[var(--color-surface-glass)] backdrop-blur-md border-b border-[var(--color-border-glass)] shadow-sm shrink-0 z-20">
-          <div className="flex items-center gap-4">
+        <div className="flex justify-between items-center px-4 md:px-6 py-4 bg-[var(--color-surface-glass)] backdrop-blur-md border-b border-[var(--color-border-glass)] shadow-sm shrink-0 z-20">
+          <div className="flex items-center gap-3 md:gap-4">
              <button 
                 onClick={onClose} 
                 className="group flex items-center gap-2 px-3 py-2 hover:bg-[var(--color-surface-200)] rounded-xl transition-all text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]"
@@ -87,30 +87,30 @@ export const DataExplorerModal: React.FC<DataExplorerModalProps> = ({ isOpen, on
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transform rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
-                <span className="font-medium text-sm">חזרה לדשבורד</span>
+                <span className="font-medium text-sm hidden md:inline">חזרה לדשבורד</span>
              </button>
-             <div className="h-8 w-px bg-[var(--color-border-glass)] mx-2"></div>
+             <div className="h-8 w-px bg-[var(--color-border-glass)] mx-2 hidden md:block"></div>
              <div>
-                <h2 className="text-xl font-extrabold text-[var(--color-text-main)]">סייר נתונים (Data Explorer)</h2>
-                <p className="text-sm text-[var(--color-text-muted)]">צפייה בכל הטבלאות, המטא-דאטה והנתונים הגולמיים</p>
+                <h2 className="text-lg md:text-xl font-extrabold text-[var(--color-text-main)]">סייר נתונים</h2>
+                <p className="text-xs md:text-sm text-[var(--color-text-muted)] hidden md:block">צפייה בכל הטבלאות, המטא-דאטה והנתונים הגולמיים</p>
              </div>
           </div>
         </div>
 
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
           
-          {/* Sidebar - Entities List */}
-          <div className="w-72 bg-[var(--color-surface-glass)] backdrop-blur-sm border-l border-[var(--color-border-glass)] overflow-y-auto p-4 flex-shrink-0">
-            <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-4 px-2">ישויות ({schema.entities.length})</h3>
-            <ul className="space-y-1">
+          {/* Sidebar - Entities List. On Mobile it becomes a top horizontal scroller */}
+          <div className="w-full md:w-72 bg-[var(--color-surface-glass)] backdrop-blur-sm border-b md:border-b-0 md:border-l border-[var(--color-border-glass)] overflow-x-auto md:overflow-y-auto p-2 md:p-4 flex-shrink-0 flex md:block gap-2 no-scrollbar">
+            <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 md:mb-4 px-2 hidden md:block">ישויות ({schema.entities.length})</h3>
+            <ul className="flex md:block gap-2 md:space-y-1">
               {schema.entities.map((entity) => (
-                <li key={entity.name}>
+                <li key={entity.name} className="flex-shrink-0">
                   <button
                     onClick={() => setSelectedEntity(entity)}
-                    className={`w-full text-right px-4 py-3 rounded-xl text-sm font-medium transition-all
+                    className={`w-auto md:w-full text-right px-4 py-2 md:py-3 rounded-xl text-sm font-medium transition-all whitespace-nowrap
                       ${selectedEntity?.name === entity.name 
                         ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-sm ring-1 ring-[var(--color-primary)]/20' 
-                        : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-200)] hover:text-[var(--color-text-main)]'}
+                        : 'text-[var(--color-text-muted)] bg-[var(--color-surface-200)] md:bg-transparent hover:bg-[var(--color-surface-200)] hover:text-[var(--color-text-main)]'}
                     `}
                   >
                     {entity.name}
@@ -124,33 +124,33 @@ export const DataExplorerModal: React.FC<DataExplorerModalProps> = ({ isOpen, on
           <div className="flex-1 flex flex-col overflow-hidden bg-[var(--color-surface-100)] relative">
             
             {/* Toolbar / Tabs */}
-            <div className="flex items-center justify-between px-8 py-4 bg-[var(--color-surface-glass)] border-b border-[var(--color-border-glass)] shrink-0 z-10">
-               <div className="flex gap-8">
+            <div className="flex items-center justify-between px-4 md:px-8 py-3 md:py-4 bg-[var(--color-surface-glass)] border-b border-[var(--color-border-glass)] shrink-0 z-10 overflow-x-auto">
+               <div className="flex gap-6 md:gap-8">
                  <button 
                    onClick={() => setActiveTab('data')}
                    className={`pb-2 text-sm font-bold transition-all relative ${activeTab === 'data' ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
                  >
                    נתונים
-                   {activeTab === 'data' && <span className="absolute -bottom-4.5 right-0 w-full h-1 bg-[var(--color-primary)] rounded-t-full shadow-[0_-2px_8px_rgba(var(--color-primary),0.5)]"></span>}
+                   {activeTab === 'data' && <span className="absolute -bottom-3.5 md:-bottom-4.5 right-0 w-full h-1 bg-[var(--color-primary)] rounded-t-full shadow-[0_-2px_8px_rgba(var(--color-primary),0.5)]"></span>}
                  </button>
                  <button 
                    onClick={() => setActiveTab('metadata')}
                    className={`pb-2 text-sm font-bold transition-all relative ${activeTab === 'metadata' ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
                  >
                    מבנה (Metadata)
-                   {activeTab === 'metadata' && <span className="absolute -bottom-4.5 right-0 w-full h-1 bg-[var(--color-primary)] rounded-t-full shadow-[0_-2px_8px_rgba(var(--color-primary),0.5)]"></span>}
+                   {activeTab === 'metadata' && <span className="absolute -bottom-3.5 md:-bottom-4.5 right-0 w-full h-1 bg-[var(--color-primary)] rounded-t-full shadow-[0_-2px_8px_rgba(var(--color-primary),0.5)]"></span>}
                  </button>
                </div>
                
                {selectedEntity && (
-                 <div className="text-xs font-mono text-[var(--color-text-main)] bg-[var(--color-surface-200)] px-3 py-1.5 rounded-lg border border-[var(--color-border-glass)]">
-                    {loading ? 'טוען ספירה...' : `סה"כ רשומות: ${totalCount !== null ? totalCount.toLocaleString() : 'לא ידוע'}`}
+                 <div className="text-[10px] md:text-xs font-mono text-[var(--color-text-main)] bg-[var(--color-surface-200)] px-2 py-1 md:px-3 md:py-1.5 rounded-lg border border-[var(--color-border-glass)] whitespace-nowrap">
+                    {loading ? 'טוען ספירה...' : `סה"כ: ${totalCount !== null ? totalCount.toLocaleString() : '?'}`}
                  </div>
                )}
             </div>
 
             {/* Content Container - Ensure full height usage */}
-            <div className="flex-1 overflow-hidden p-6 relative flex flex-col">
+            <div className="flex-1 overflow-hidden p-4 md:p-6 relative flex flex-col">
               {loading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-[var(--color-surface-100)]/70 backdrop-blur-sm z-20 rounded-2xl">
                    <div className="flex flex-col items-center gap-3">
@@ -173,7 +173,7 @@ export const DataExplorerModal: React.FC<DataExplorerModalProps> = ({ isOpen, on
                           <thead className="bg-[var(--color-surface-200)] sticky top-0 z-10 ring-1 ring-[var(--color-border-glass)]">
                             <tr>
                               {selectedEntity?.fields.map(field => (
-                                <th key={field.name} className="px-6 py-4 font-bold text-[var(--color-text-muted)] whitespace-nowrap bg-[var(--color-surface-200)] border-b border-[var(--color-border-glass)]">
+                                <th key={field.name} className="px-4 py-3 md:px-6 md:py-4 font-bold text-[var(--color-text-muted)] whitespace-nowrap bg-[var(--color-surface-200)] border-b border-[var(--color-border-glass)]">
                                   {field.name}
                                 </th>
                               ))}
@@ -183,7 +183,7 @@ export const DataExplorerModal: React.FC<DataExplorerModalProps> = ({ isOpen, on
                             {data.map((row, idx) => (
                               <tr key={idx} className="hover:bg-[var(--color-primary)]/5 transition-colors group">
                                 {selectedEntity?.fields.map(field => (
-                                  <td key={`${idx}-${field.name}`} className="px-6 py-3 text-[var(--color-text-main)] whitespace-nowrap group-hover:text-[var(--color-primary)] transition-colors">
+                                  <td key={`${idx}-${field.name}`} className="px-4 py-2 md:px-6 md:py-3 text-[var(--color-text-main)] whitespace-nowrap group-hover:text-[var(--color-primary)] transition-colors">
                                     {row[field.name] !== undefined ? String(row[field.name]) : '-'}
                                   </td>
                                 ))}
@@ -199,11 +199,11 @@ export const DataExplorerModal: React.FC<DataExplorerModalProps> = ({ isOpen, on
 
               {activeTab === 'metadata' && selectedEntity && (
                 <div className="flex-1 overflow-y-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 pb-6">
                     {selectedEntity.fields.map((field) => (
-                        <div key={field.name} className="bg-[var(--color-surface-glass)] backdrop-blur-md p-6 rounded-2xl border border-[var(--color-border-glass)] hover:border-[var(--color-primary)]/50 hover:shadow-lg transition-all group h-full">
+                        <div key={field.name} className="bg-[var(--color-surface-glass)] backdrop-blur-md p-4 md:p-6 rounded-2xl border border-[var(--color-border-glass)] hover:border-[var(--color-primary)]/50 hover:shadow-lg transition-all group h-full">
                         <div className="flex justify-between items-start mb-2">
-                            <div className="font-bold text-[var(--color-text-main)] text-lg group-hover:text-[var(--color-primary)] transition-colors">{field.name}</div>
+                            <div className="font-bold text-[var(--color-text-main)] text-base md:text-lg group-hover:text-[var(--color-primary)] transition-colors">{field.name}</div>
                             <div className="text-[10px] font-mono text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2 py-1 rounded uppercase tracking-wider">
                                 {field.type}
                             </div>

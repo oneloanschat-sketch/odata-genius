@@ -354,7 +354,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
                    {/* Remove Button for KPI */}
                    <button 
                       onClick={() => onRemove(config.id)}
-                      className="text-[var(--color-text-muted)] hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 p-1"
+                      className="text-[var(--color-text-muted)] hover:text-red-500 transition-colors md:opacity-0 md:group-hover:opacity-100 p-2 md:p-1"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -376,7 +376,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
                     
                     <button 
                         onClick={() => onDrillDown(config)}
-                        className="text-xs text-[var(--color-primary)] font-bold hover:underline opacity-80 hover:opacity-100 flex items-center gap-1"
+                        className="text-xs text-[var(--color-primary)] font-bold hover:underline opacity-80 hover:opacity-100 flex items-center gap-1 p-2 md:p-0"
                     >
                         נתונים
                         <svg className="w-3 h-3 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
@@ -396,17 +396,17 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Header */}
-      <div className="p-6 border-b border-[var(--color-border-glass)] flex justify-between items-start bg-gradient-to-b from-white/5 to-transparent">
-        <div>
-          <h3 className="text-lg font-extrabold text-[var(--color-text-main)] tracking-tight">{config.title}</h3>
+      <div className="p-4 md:p-6 border-b border-[var(--color-border-glass)] flex justify-between items-start bg-gradient-to-b from-white/5 to-transparent">
+        <div className="flex-1 pr-2">
+          <h3 className="text-base md:text-lg font-extrabold text-[var(--color-text-main)] tracking-tight leading-tight">{config.title}</h3>
           <p className="text-xs text-[var(--color-text-muted)] mt-1 line-clamp-1 font-medium">{config.description}</p>
         </div>
         
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-2">
             {/* SQL Indicator */}
             {config.sqlQuery && (
-               <div className="group/sql relative">
+               <div className="group/sql relative hidden md:block">
                  <div className={`text-[10px] font-mono font-bold border px-2 py-1 rounded cursor-help ${connectionParams?.ontology ? 'text-purple-500 border-purple-500/30 bg-purple-500/5' : 'text-[var(--color-primary)] border-[var(--color-primary)]/30 bg-[var(--color-primary)]/5'}`}>
                     {connectionParams?.ontology ? 'KG' : 'SQL'}
                  </div>
@@ -416,8 +416,8 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
                </div>
             )}
 
-            {/* Search/Filter Toggle */}
-            <div className={`relative transition-all duration-300 ${isHovered || filterValue ? 'w-40 opacity-100' : 'w-8 opacity-0 pointer-events-none'}`}>
+            {/* Search/Filter Toggle - Expanded on mobile if active, compressed otherwise */}
+            <div className={`relative transition-all duration-300 ${isHovered || filterValue ? 'w-32 md:w-40 opacity-100' : 'w-8 opacity-0 pointer-events-none'}`}>
                 <input 
                     type="text" 
                     value={filterValue}
@@ -432,7 +432,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
 
             <button 
               onClick={() => onRemove(config.id)}
-              className="p-1.5 text-[var(--color-text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+              className="p-2 md:p-1.5 text-[var(--color-text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -442,17 +442,17 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
       </div>
 
       {/* Main Chart Area */}
-      <div className="flex-1 p-4 w-full">
+      <div className="flex-1 p-2 md:p-4 w-full min-h-[300px]">
          {renderChart()}
       </div>
 
       {/* Footer / Actions */}
-      <div className="px-6 py-3 bg-[var(--color-surface-200)]/30 border-t border-[var(--color-border-glass)] flex justify-between items-center text-xs">
+      <div className="px-4 md:px-6 py-3 bg-[var(--color-surface-200)]/30 border-t border-[var(--color-border-glass)] flex justify-between items-center text-xs">
          <div className="flex gap-4 text-[var(--color-text-muted)] font-mono font-medium">
             {processedData.length > 0 && (
                 <>
                     <span title="Total" className="flex items-center gap-1"><span className="text-[var(--color-primary)]">∑</span> {total.toLocaleString()}</span>
-                    <span title="Average" className="flex items-center gap-1"><span className="text-[var(--color-secondary)]">Ø</span> {average.toLocaleString(undefined, { maximumFractionDigits: 1 })}</span>
+                    <span title="Average" className="flex items-center gap-1 hidden md:flex"><span className="text-[var(--color-secondary)]">Ø</span> {average.toLocaleString(undefined, { maximumFractionDigits: 1 })}</span>
                 </>
             )}
          </div>

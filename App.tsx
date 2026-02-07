@@ -281,7 +281,7 @@ const App: React.FC = () => {
         {/* Theme Toggle Absolute Position for Landing */}
         <button 
            onClick={() => setIsDarkMode(!isDarkMode)}
-           className="absolute top-6 right-6 p-3 rounded-full bg-[var(--color-surface-glass)] border border-[var(--color-border-glass)] text-[var(--color-text-main)] hover:bg-[var(--color-surface-200)] transition-all z-20"
+           className="absolute top-6 right-6 p-3 rounded-full bg-[var(--color-surface-glass)] border border-[var(--color-border-glass)] text-[var(--color-text-main)] hover:bg-[var(--color-surface-200)] transition-all z-20 shadow-md"
            title={isDarkMode ? "עבור למצב בהיר" : "עבור למצב כהה"}
         >
             {isDarkMode ? (
@@ -296,10 +296,10 @@ const App: React.FC = () => {
         </button>
 
         {/* Decorative elements for landing */}
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[var(--color-primary)] blur-[120px] opacity-10 animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[var(--color-secondary)] blur-[120px] opacity-10"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] rounded-full bg-[var(--color-primary)] blur-[80px] md:blur-[120px] opacity-10 animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[350px] md:w-[600px] h-[350px] md:h-[600px] rounded-full bg-[var(--color-secondary)] blur-[80px] md:blur-[120px] opacity-10"></div>
 
-        <div className="max-w-md w-full bg-[var(--color-surface-glass)] backdrop-blur-2xl rounded-3xl shadow-[var(--shadow-glass)] border border-[var(--color-border-glass)] p-8 text-center relative z-10">
+        <div className="w-full max-w-md bg-[var(--color-surface-glass)] backdrop-blur-2xl rounded-3xl shadow-[var(--shadow-glass)] border border-[var(--color-border-glass)] p-6 md:p-8 text-center relative z-10 m-2">
           <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-2xl flex items-center justify-center text-white font-bold text-3xl mx-auto mb-6 shadow-lg shadow-purple-500/30">
             G
           </div>
@@ -307,7 +307,7 @@ const App: React.FC = () => {
           <p className="text-[var(--color-text-muted)] mb-8">הדור הבא של ניתוח נתונים ויזואלי</p>
           
           {/* Tabs - Now resets state on switch */}
-          <div className="flex p-1 bg-[var(--color-surface-200)]/50 rounded-xl mb-6 border border-[var(--color-border-glass)] gap-1">
+          <div className="flex p-1 bg-[var(--color-surface-200)]/50 rounded-xl mb-6 border border-[var(--color-border-glass)] gap-1 overflow-x-auto no-scrollbar">
              <button 
                 onClick={() => {
                    setMode('odata');
@@ -316,7 +316,7 @@ const App: React.FC = () => {
                    setWidgets([]);
                    setFileData([]);
                 }}
-                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === 'odata' ? 'bg-[var(--color-surface-100)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
+                className={`flex-1 min-w-[60px] py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${mode === 'odata' ? 'bg-[var(--color-surface-100)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
              >
                API
              </button>
@@ -328,7 +328,7 @@ const App: React.FC = () => {
                    setWidgets([]);
                    setFileData([]);
                 }}
-                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === 'sql' ? 'bg-[var(--color-surface-100)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
+                className={`flex-1 min-w-[60px] py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${mode === 'sql' ? 'bg-[var(--color-surface-100)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
              >
                BigQuery
              </button>
@@ -340,7 +340,7 @@ const App: React.FC = () => {
                    setWidgets([]);
                    setFileData([]);
                 }}
-                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === 'timbr' ? 'bg-[var(--color-surface-100)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
+                className={`flex-1 min-w-[60px] py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${mode === 'timbr' ? 'bg-[var(--color-surface-100)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
              >
                Timbr KG
              </button>
@@ -352,7 +352,7 @@ const App: React.FC = () => {
                    setWidgets([]);
                    setFileData([]);
                 }}
-                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === 'file' ? 'bg-[var(--color-surface-100)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
+                className={`flex-1 min-w-[60px] py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${mode === 'file' ? 'bg-[var(--color-surface-100)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
              >
                קובץ
              </button>
@@ -366,20 +366,20 @@ const App: React.FC = () => {
                    type="url" 
                    value={baseUrl}
                    onChange={(e) => setBaseUrl(e.target.value)}
-                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all"
+                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all text-base"
                    dir="ltr"
                    required
                  />
                </div>
 
-               <div className="grid grid-cols-2 gap-4">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div>
                    <label className="block text-xs font-bold text-[var(--color-text-muted)] mb-1 uppercase tracking-wider">שם משתמש</label>
                    <input 
                      type="text" 
                      value={username}
                      onChange={(e) => setUsername(e.target.value)}
-                     className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all"
+                     className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all text-base"
                      dir="ltr"
                      placeholder="אופציונלי"
                    />
@@ -390,7 +390,7 @@ const App: React.FC = () => {
                      type="password" 
                      value={password}
                      onChange={(e) => setPassword(e.target.value)}
-                     className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all"
+                     className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all text-base"
                      dir="ltr"
                      placeholder="אופציונלי"
                    />
@@ -400,7 +400,7 @@ const App: React.FC = () => {
                <button 
                  type="submit" 
                  disabled={isConnecting}
-                 className="w-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-purple-500/20 flex justify-center items-center gap-2 mt-2"
+                 className="w-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-purple-500/20 flex justify-center items-center gap-2 mt-2 touch-manipulation"
                >
                  {isConnecting && <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>}
                  התחבר למערכת
@@ -416,7 +416,7 @@ const App: React.FC = () => {
                    type="text" 
                    value={projectId}
                    onChange={(e) => setProjectId(e.target.value)}
-                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all"
+                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all text-base"
                    dir="ltr"
                    required
                  />
@@ -427,7 +427,7 @@ const App: React.FC = () => {
                    type="text" 
                    value={datasetId}
                    onChange={(e) => setDatasetId(e.target.value)}
-                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all"
+                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all text-base"
                    dir="ltr"
                    required
                  />
@@ -436,7 +436,7 @@ const App: React.FC = () => {
                <button 
                  type="submit" 
                  disabled={isConnecting}
-                 className="w-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-purple-500/20 flex justify-center items-center gap-2 mt-2"
+                 className="w-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-purple-500/20 flex justify-center items-center gap-2 mt-2 touch-manipulation"
                >
                  {isConnecting && <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>}
                  התחבר ל-BigQuery
@@ -452,7 +452,7 @@ const App: React.FC = () => {
                    type="text" 
                    value={ontology}
                    onChange={(e) => setOntology(e.target.value)}
-                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all"
+                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all text-base"
                    dir="ltr"
                    required
                  />
@@ -463,7 +463,7 @@ const App: React.FC = () => {
                    type="password" 
                    value={timbrToken}
                    onChange={(e) => setTimbrToken(e.target.value)}
-                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all"
+                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all text-base"
                    dir="ltr"
                  />
                </div>
@@ -471,7 +471,7 @@ const App: React.FC = () => {
                <button 
                  type="submit" 
                  disabled={isConnecting}
-                 className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-purple-500/20 flex justify-center items-center gap-2 mt-2"
+                 className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-purple-500/20 flex justify-center items-center gap-2 mt-2 touch-manipulation"
                >
                  {isConnecting && <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>}
                  התחבר ל-Timbr.ai
@@ -512,9 +512,9 @@ const App: React.FC = () => {
             <div className="max-w-[1600px] mx-auto px-4 py-3">
                <div className="flex flex-col gap-4">
                   
-                  {/* Top Bar */}
-                  <div className="flex justify-between items-center">
-                     <div className="flex items-center gap-3">
+                  {/* Top Bar - Stack on mobile, row on desktop */}
+                  <div className="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-0">
+                     <div className="flex items-center gap-3 w-full md:w-auto justify-center md:justify-start">
                         <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-purple-500/20 cursor-pointer" onClick={() => setIsConnected(false)}>G</div>
                         <div className="flex flex-col">
                             <span className="font-extrabold text-lg text-[var(--color-text-main)] leading-tight">Data Genius</span>
@@ -527,10 +527,10 @@ const App: React.FC = () => {
                         </div>
                      </div>
                      
-                     <div className="flex items-center gap-2">
+                     <div className="flex items-center gap-2 w-full md:w-auto justify-center">
                         <button 
                             onClick={() => setIsExplorerOpen(true)}
-                            className="p-2 md:px-4 md:py-2 rounded-xl bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-surface-300)] transition-all text-xs font-bold flex items-center gap-2 border border-[var(--color-border-glass)]"
+                            className="p-2 md:px-4 md:py-2 rounded-xl bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-surface-300)] transition-all text-xs font-bold flex items-center gap-2 border border-[var(--color-border-glass)] justify-center"
                             title="סייר נתונים"
                         >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>
@@ -539,7 +539,7 @@ const App: React.FC = () => {
                         
                         <button 
                             onClick={() => setIsFavoritesOpen(true)}
-                            className="p-2 rounded-xl bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-surface-300)] transition-all relative border border-[var(--color-border-glass)]"
+                            className="p-2 md:px-3 md:py-2 rounded-xl bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-surface-300)] transition-all relative border border-[var(--color-border-glass)]"
                             title="מועדפים"
                         >
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
@@ -550,7 +550,7 @@ const App: React.FC = () => {
 
                         <button 
                            onClick={() => setIsDarkMode(!isDarkMode)}
-                           className="p-2 rounded-xl bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-surface-300)] transition-all border border-[var(--color-border-glass)]"
+                           className="p-2 md:px-3 md:py-2 rounded-xl bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-surface-300)] transition-all border border-[var(--color-border-glass)]"
                         >
                             {isDarkMode ? (
                                <svg className="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
@@ -562,13 +562,13 @@ const App: React.FC = () => {
                   </div>
 
                   {/* Search / Prompt Bar */}
-                  <div className="w-full max-w-3xl mx-auto space-y-3">
+                  <div className="w-full max-w-3xl mx-auto space-y-2">
                       <form onSubmit={handleGenerate} className="relative group flex items-center">
                            <input 
                                type="text" 
                                value={prompt}
                                onChange={(e) => setPrompt(e.target.value)}
-                               className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] text-[var(--color-text-main)] text-sm rounded-2xl py-4 pr-6 pl-14 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none focus:border-transparent shadow-sm transition-all placeholder-gray-400 group-hover:shadow-md"
+                               className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] text-[var(--color-text-main)] text-sm rounded-2xl py-3 md:py-4 pr-6 pl-14 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none focus:border-transparent shadow-sm transition-all placeholder-gray-400 group-hover:shadow-md text-base"
                                placeholder="מה תרצה לדעת על הנתונים? (לדוגמה: 'הצג את סך ההזמנות לפי מדינה בגרף עוגה')"
                                disabled={isGenerating}
                            />
@@ -592,19 +592,19 @@ const App: React.FC = () => {
                       </form>
                       
                       {/* Suggestions and other actions outside */}
-                      <div className="flex justify-center gap-2">
+                      <div className="flex flex-row justify-center gap-2 w-full">
                            <button 
                                type="button" 
                                onClick={handleSuggest} 
                                disabled={isSuggesting || isGenerating}
-                               className="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white transition-all flex items-center gap-2 border border-[var(--color-border-glass)]"
+                               className="flex-1 px-2 py-2.5 rounded-xl text-xs font-bold bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white transition-all flex items-center justify-center gap-2 border border-[var(--color-border-glass)]"
                            >
                                {isSuggesting ? (
                                    <span className="animate-pulse">מייצר...</span>
                                ) : (
                                    <>
                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-                                       <span>הצע דשבורד אוטומטי</span>
+                                       <span className="truncate">הצע דשבורד</span>
                                    </>
                                )}
                            </button>
@@ -613,14 +613,14 @@ const App: React.FC = () => {
                                type="button" 
                                onClick={handleAdvancedInsights} 
                                disabled={isInsightsLoading || isGenerating}
-                               className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--color-secondary)] to-purple-600 text-white hover:opacity-90 transition-all flex items-center gap-2 shadow-md shadow-purple-500/20"
+                               className="flex-1 px-2 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--color-secondary)] to-purple-600 text-white hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-md shadow-purple-500/20"
                            >
                                {isInsightsLoading ? (
                                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
                                ) : (
                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                                )}
-                               <span>ניתוח חכם</span>
+                               <span className="truncate">ניתוח חכם</span>
                            </button>
                       </div>
                       
