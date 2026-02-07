@@ -74,7 +74,17 @@ export const MOCK_KG_SCHEMA: DatabaseSchema = {
   ]
 };
 
-export const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+// Updated Professional Palette (Vibrant & Deep)
+export const COLORS = [
+  '#6366f1', // Indigo
+  '#ec4899', // Pink
+  '#06b6d4', // Cyan
+  '#10b981', // Emerald
+  '#f59e0b', // Amber
+  '#8b5cf6', // Violet
+  '#f43f5e', // Rose
+  '#3b82f6', // Blue
+];
 
 export const SAMPLE_PROMPTS = [
   "תראה לי את סך המכירות לפי אזור בגרף עמודות",

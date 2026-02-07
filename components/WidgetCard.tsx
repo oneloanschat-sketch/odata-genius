@@ -40,10 +40,6 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
         let result: DataPoint[] = [];
         
         if (config.sqlQuery) {
-            // Check based on the "mode" which is passed via baseUrl string hack or we infer from connectionParams
-            // In a cleaner refactor, we would pass 'mode' explicitly. 
-            // Here we detect if we are in Timbr mode if connectionParams has 'ontology'
-            
             if (connectionParams && connectionParams.ontology) {
                // Timbr Semantic SQL
                result = await executeMockTimbrQuery(
@@ -104,11 +100,8 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
       });
     }
 
-    // 2. Client-side Aggregation (Grouping) - Only needed for OData/File where we fetch raw data
-    // If it's SQL, we assume the DB did the aggregation if the query was GROUP BY
-    // But for safety, we keep this logic if the SQL returned raw rows.
+    // 2. Client-side Aggregation (Grouping)
     if (result.length > 0 && xKey && mainKey) {
-        // Check if data is already aggregated (unique keys)
         const keySet = new Set<string>();
         let needsAggregation = false;
         
@@ -147,6 +140,58 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
   const total = useMemo(() => processedData.reduce((acc, curr) => acc + (Number(curr[mainKey]) || 0), 0), [processedData, mainKey]);
   const average = useMemo(() => processedData.length ? total / processedData.length : 0, [total, processedData]);
 
+  // --- Visual Definitions ---
+  // We define Gradients and Filters to make charts look premium
+  const renderDefs = (id: string) => (
+    <defs>
+      {/* Primary Gradient (Blue-Indigo) */}
+      <linearGradient id={`grad-primary-${id}`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor={COLORS[0]} stopOpacity={0.9}/>
+        <stop offset="100%" stopColor={COLORS[0]} stopOpacity={0.4}/>
+      </linearGradient>
+      
+      {/* Secondary Gradient (Pink-Rose) */}
+      <linearGradient id={`grad-secondary-${id}`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor={COLORS[1]} stopOpacity={0.9}/>
+        <stop offset="100%" stopColor={COLORS[1]} stopOpacity={0.4}/>
+      </linearGradient>
+
+      {/* Area Chart Gradient (Fade to transparent) */}
+      <linearGradient id={`grad-area-${id}`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="5%" stopColor={COLORS[2]} stopOpacity={0.5}/>
+        <stop offset="95%" stopColor={COLORS[2]} stopOpacity={0}/>
+      </linearGradient>
+
+      {/* Glow Filter */}
+      <filter id={`glow-${id}`} height="300%" width="300%" x="-75%" y="-75%">
+        <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+        <feMerge>
+            <feMergeNode in="coloredBlur" />
+            <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+  );
+
+  // Styling for Axes and Tooltips
+  const axisStyle = { 
+     fontSize: 10, 
+     fill: 'var(--color-text-muted)', 
+     fontFamily: 'Heebo, sans-serif',
+     fontWeight: 500
+  };
+
+  const tooltipStyle = { 
+    backgroundColor: 'rgba(20, 20, 30, 0.85)', 
+    borderRadius: '12px', 
+    border: '1px solid rgba(255,255,255,0.1)', 
+    backdropFilter: 'blur(12px)',
+    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)', 
+    color: '#fff',
+    padding: '12px',
+    fontSize: '12px'
+  };
+
   // Render Charts
   const renderChart = () => {
     if (loading) {
@@ -172,15 +217,6 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
       );
     }
 
-    const commonTooltipStyle = { 
-        backgroundColor: 'var(--color-surface-200)', 
-        borderRadius: '8px', 
-        border: '1px solid var(--color-border-glass)', 
-        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', 
-        color: 'var(--color-text-main)',
-        zIndex: 50
-    };
-
     switch (config.chartType) {
       case ChartType.KPICARD:
         return null;
@@ -189,11 +225,25 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
         return (
           <ResponsiveContainer width="100%" height="100%" minHeight={200}>
             <LineChart data={processedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-glass)" />
-              <XAxis dataKey={xKey} stroke="var(--color-text-muted)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
-              <YAxis stroke="var(--color-text-muted)" fontSize={11} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={commonTooltipStyle} itemStyle={{ color: 'var(--color-text-main)', fontWeight: 600 }} />
-              <Line type="monotone" dataKey={mainKey} stroke={COLORS[0]} strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: 'var(--color-surface-100)' }} activeDot={{ r: 7 }} animationDuration={1000} />
+              {renderDefs(config.id)}
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-glass)" strokeOpacity={0.5} />
+              <XAxis dataKey={xKey} tick={axisStyle} tickLine={false} axisLine={false} dy={10} />
+              <YAxis tick={axisStyle} tickLine={false} axisLine={false} width={30} />
+              <Tooltip 
+                contentStyle={tooltipStyle} 
+                itemStyle={{ color: '#fff', fontWeight: 600 }}
+                cursor={{ stroke: 'var(--color-primary)', strokeWidth: 1, strokeDasharray: '4 4' }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey={mainKey} 
+                stroke={`url(#grad-primary-${config.id})`} // Use Gradient stroke
+                strokeWidth={4} 
+                dot={false}
+                activeDot={{ r: 6, strokeWidth: 0, fill: '#fff', stroke: COLORS[0] }} 
+                animationDuration={1500} 
+                filter={`url(#glow-${config.id})`} // Apply glow
+              />
             </LineChart>
           </ResponsiveContainer>
         );
@@ -201,24 +251,29 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
         return (
           <ResponsiveContainer width="100%" height="100%" minHeight={200}>
             <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+              {renderDefs(config.id)}
               <Pie
                 data={processedData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
+                innerRadius={60} // Donut Style
                 outerRadius={80}
                 paddingAngle={4}
                 dataKey={mainKey}
                 nameKey={xKey}
-                label={{ fill: 'var(--color-text-main)', fontSize: 11, fontWeight: 500 }}
-                labelLine={{ stroke: 'var(--color-text-muted)', strokeWidth: 1 }}
+                stroke="none"
               >
                 {processedData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--color-surface-100)" strokeWidth={2} />
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={COLORS[index % COLORS.length]} 
+                    stroke="rgba(255,255,255,0.1)" 
+                    strokeWidth={1} 
+                  />
                 ))}
               </Pie>
-              <Tooltip contentStyle={commonTooltipStyle} itemStyle={{ color: 'var(--color-text-main)' }} />
-              <Legend verticalAlign="bottom" height={36} iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: 'var(--color-text-muted)' }}/>
+              <Tooltip contentStyle={tooltipStyle} itemStyle={{ color: '#fff' }} />
+              <Legend verticalAlign="bottom" height={36} iconType="circle" iconSize={6} wrapperStyle={{ fontSize: '11px', color: 'var(--color-text-muted)', fontFamily: 'Heebo' }}/>
             </PieChart>
           </ResponsiveContainer>
         );
@@ -226,17 +281,20 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
         return (
           <ResponsiveContainer width="100%" height="100%" minHeight={200}>
             <AreaChart data={processedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id={`color-${config.id}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS[1]} stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor={COLORS[1]} stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-glass)" />
-              <XAxis dataKey={xKey} stroke="var(--color-text-muted)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
-              <YAxis stroke="var(--color-text-muted)" fontSize={11} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={commonTooltipStyle} itemStyle={{ color: 'var(--color-text-main)' }} />
-              <Area type="monotone" dataKey={mainKey} stroke={COLORS[1]} fillOpacity={1} fill={`url(#color-${config.id})`} strokeWidth={3} animationDuration={1000} />
+              {renderDefs(config.id)}
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-glass)" strokeOpacity={0.5} />
+              <XAxis dataKey={xKey} tick={axisStyle} tickLine={false} axisLine={false} dy={10} />
+              <YAxis tick={axisStyle} tickLine={false} axisLine={false} width={30} />
+              <Tooltip contentStyle={tooltipStyle} itemStyle={{ color: '#fff' }} cursor={{ stroke: COLORS[2], strokeWidth: 1 }} />
+              <Area 
+                type="monotone" 
+                dataKey={mainKey} 
+                stroke={COLORS[2]} 
+                fillOpacity={1} 
+                fill={`url(#grad-area-${config.id})`} 
+                strokeWidth={3} 
+                animationDuration={1500} 
+              />
             </AreaChart>
           </ResponsiveContainer>
         );
@@ -244,14 +302,22 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
       default:
         return (
           <ResponsiveContainer width="100%" height="100%" minHeight={200}>
-            <BarChart data={processedData} barSize={32} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-glass)" />
-              <XAxis dataKey={xKey} stroke="var(--color-text-muted)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
-              <YAxis stroke="var(--color-text-muted)" fontSize={11} tickLine={false} axisLine={false} />
-              <Tooltip cursor={{fill: 'var(--color-border-glass)'}} contentStyle={commonTooltipStyle} itemStyle={{ color: 'var(--color-text-main)' }} />
-              <Bar dataKey={mainKey} fill={COLORS[0]} radius={[6, 6, 0, 0]} animationDuration={1000}>
+            <BarChart data={processedData} barSize={28} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              {renderDefs(config.id)}
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-glass)" strokeOpacity={0.5} />
+              <XAxis dataKey={xKey} tick={axisStyle} tickLine={false} axisLine={false} dy={10} />
+              <YAxis tick={axisStyle} tickLine={false} axisLine={false} width={30} />
+              <Tooltip cursor={{fill: 'var(--color-border-glass)', opacity: 0.3}} contentStyle={tooltipStyle} itemStyle={{ color: '#fff' }} />
+              <Bar 
+                dataKey={mainKey} 
+                fill={`url(#grad-primary-${config.id})`} 
+                radius={[6, 6, 0, 0]} 
+                animationDuration={1200}
+              >
                  {processedData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                   // Optional: Cycle through gradients for a multi-color bar chart effect, 
+                   // or keep uniform for a clean look. Let's do uniform but allow override.
+                  <Cell key={`cell-${index}`} fill={index % 2 === 0 ? `url(#grad-primary-${config.id})` : `url(#grad-secondary-${config.id})`} />
                 ))}
               </Bar>
             </BarChart>
@@ -270,17 +336,17 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
           onMouseLeave={() => setIsHovered(false)}
         >
              {/* Background Decoration */}
-             <div className="absolute -left-6 -top-6 w-24 h-24 bg-gradient-to-br from-[var(--color-primary)] to-transparent rounded-full opacity-10 group-hover:scale-150 transition-transform duration-500 ease-in-out blur-xl"></div>
-             <div className="absolute right-0 bottom-0 w-32 h-32 bg-gradient-to-tl from-[var(--color-secondary)] to-transparent rounded-full opacity-5 blur-2xl"></div>
+             <div className="absolute -left-6 -top-6 w-32 h-32 bg-gradient-to-br from-[var(--color-primary)] to-transparent rounded-full opacity-10 group-hover:scale-150 transition-transform duration-700 ease-in-out blur-2xl"></div>
+             <div className="absolute right-0 bottom-0 w-40 h-40 bg-gradient-to-tl from-[var(--color-secondary)] to-transparent rounded-full opacity-5 blur-3xl"></div>
              
              <div className="relative z-10 flex flex-col h-full justify-between">
                 <div className="flex justify-between items-start w-full">
                    <div>
-                       <h3 className="text-[var(--color-text-muted)] font-bold text-sm mb-1 uppercase tracking-wider">{config.title}</h3>
+                       <h3 className="text-[var(--color-text-muted)] font-bold text-xs mb-2 uppercase tracking-widest">{config.title}</h3>
                        {loading ? (
                            <div className="h-10 w-32 bg-[var(--color-border-glass)] rounded animate-pulse mt-2"></div>
                        ) : (
-                           <div className="text-4xl font-extrabold text-[var(--color-text-main)] tracking-tight drop-shadow-sm mt-1">
+                           <div className="text-4xl md:text-5xl font-black text-[var(--color-text-main)] tracking-tight drop-shadow-sm mt-1 bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-text-main)] to-[var(--color-primary)]">
                                {total.toLocaleString()}
                            </div>
                        )}
@@ -297,9 +363,9 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
                 </div>
                 
                 <div className="flex items-end justify-between mt-4 border-t border-[var(--color-border-glass)] pt-3">
-                    <div className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full bg-green-500/10 text-green-600 dark:text-green-400">
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-                        <span>פעיל</span>
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>LIVE</span>
                     </div>
                     
                     {config.sqlQuery && (
@@ -312,7 +378,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
                         onClick={() => onDrillDown(config)}
                         className="text-xs text-[var(--color-primary)] font-bold hover:underline opacity-80 hover:opacity-100 flex items-center gap-1"
                     >
-                        נתונים גולמיים
+                        נתונים
                         <svg className="w-3 h-3 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                     </button>
                 </div>
@@ -324,16 +390,16 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
   // Standard Render for Charts
   return (
     <div 
-      className="bg-[var(--color-surface-glass)]/50 backdrop-blur-md rounded-2xl shadow-sm border border-[var(--color-border-glass)] flex flex-col relative group transition-all duration-300 hover:shadow-xl overflow-hidden h-full"
+      className="bg-[var(--color-surface-glass)]/60 backdrop-blur-xl rounded-3xl shadow-lg border border-[var(--color-border-glass)] flex flex-col relative group transition-all duration-300 hover:shadow-2xl hover:border-[var(--color-primary)]/30 overflow-hidden h-full"
       style={{ minHeight: '360px' }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Header */}
-      <div className="p-5 border-b border-[var(--color-border-glass)] flex justify-between items-start bg-gradient-to-l from-white/5 to-transparent">
+      <div className="p-6 border-b border-[var(--color-border-glass)] flex justify-between items-start bg-gradient-to-b from-white/5 to-transparent">
         <div>
-          <h3 className="text-lg font-bold text-[var(--color-text-main)] tracking-tight">{config.title}</h3>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1 line-clamp-1">{config.description}</p>
+          <h3 className="text-lg font-extrabold text-[var(--color-text-main)] tracking-tight">{config.title}</h3>
+          <p className="text-xs text-[var(--color-text-muted)] mt-1 line-clamp-1 font-medium">{config.description}</p>
         </div>
         
         {/* Actions */}
@@ -357,7 +423,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
                     value={filterValue}
                     onChange={(e) => setFilterValue(e.target.value)}
                     placeholder="סנן..."
-                    className="w-full pr-8 pl-2 py-1.5 text-xs bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-text-main)] transition-all"
+                    className="w-full pr-8 pl-2 py-1.5 text-xs bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-text-main)] transition-all shadow-inner"
                 />
                 <svg className="absolute right-2 top-2 w-3.5 h-3.5 text-[var(--color-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -381,12 +447,12 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
       </div>
 
       {/* Footer / Actions */}
-      <div className="px-5 py-3 bg-[var(--color-surface-200)]/30 border-t border-[var(--color-border-glass)] flex justify-between items-center text-xs">
-         <div className="flex gap-4 text-[var(--color-text-muted)] font-mono">
+      <div className="px-6 py-3 bg-[var(--color-surface-200)]/30 border-t border-[var(--color-border-glass)] flex justify-between items-center text-xs">
+         <div className="flex gap-4 text-[var(--color-text-muted)] font-mono font-medium">
             {processedData.length > 0 && (
                 <>
-                    <span title="Total">∑ {total.toLocaleString()}</span>
-                    <span title="Average">Ø {average.toLocaleString(undefined, { maximumFractionDigits: 1 })}</span>
+                    <span title="Total" className="flex items-center gap-1"><span className="text-[var(--color-primary)]">∑</span> {total.toLocaleString()}</span>
+                    <span title="Average" className="flex items-center gap-1"><span className="text-[var(--color-secondary)]">Ø</span> {average.toLocaleString(undefined, { maximumFractionDigits: 1 })}</span>
                 </>
             )}
          </div>
@@ -396,7 +462,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
             className="text-[var(--color-primary)] font-bold hover:bg-[var(--color-primary)]/10 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5"
          >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
-            נתונים גולמיים
+            נתונים
          </button>
       </div>
     </div>
