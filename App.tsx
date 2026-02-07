@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { generateDashboardConfig, suggestDashboards, generateAdvancedInsights } from './services/geminiService';
 import { fetchServiceSchema, executeODataQuery } from './services/odataService';
 import { parseFile, executeLocalQuery } from './services/fileService';
 import { FuturisticBentoGrid } from './components/FuturisticBentoGrid';
-import { WidgetCard } from './components/WidgetCard';
 import { DrillDownModal } from './components/DrillDownModal';
 import { DataExplorerModal } from './components/DataExplorerModal';
 import { InsightsModal } from './components/InsightsModal';
@@ -265,10 +265,18 @@ const App: React.FC = () => {
     setWidgets(prev => prev.map(w => w.id === id ? { ...w, ...newConfig } : w));
   };
 
+  // Construct generic connection params to pass to widgets
+  const connectionParams = {
+    projectId,
+    datasetId,
+    ontology,
+    token: timbrToken
+  };
+
   // Connection Screen
   if (!isConnected) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-[var(--color-surface-100)]">
         
         {/* Theme Toggle Absolute Position for Landing */}
         <button 
@@ -288,8 +296,8 @@ const App: React.FC = () => {
         </button>
 
         {/* Decorative elements for landing */}
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[oklch(65%_0.22_260)] blur-[120px] opacity-20 animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[oklch(70%_0.18_310)] blur-[120px] opacity-20"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[var(--color-primary)] blur-[120px] opacity-10 animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[var(--color-secondary)] blur-[120px] opacity-10"></div>
 
         <div className="max-w-md w-full bg-[var(--color-surface-glass)] backdrop-blur-2xl rounded-3xl shadow-[var(--shadow-glass)] border border-[var(--color-border-glass)] p-8 text-center relative z-10">
           <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-2xl flex items-center justify-center text-white font-bold text-3xl mx-auto mb-6 shadow-lg shadow-purple-500/30">
@@ -358,7 +366,7 @@ const App: React.FC = () => {
                    type="url" 
                    value={baseUrl}
                    onChange={(e) => setBaseUrl(e.target.value)}
-                   className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left transition-all"
+                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all"
                    dir="ltr"
                    required
                  />
@@ -371,7 +379,7 @@ const App: React.FC = () => {
                      type="text" 
                      value={username}
                      onChange={(e) => setUsername(e.target.value)}
-                     className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left transition-all"
+                     className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all"
                      dir="ltr"
                      placeholder="אופציונלי"
                    />
@@ -382,7 +390,7 @@ const App: React.FC = () => {
                      type="password" 
                      value={password}
                      onChange={(e) => setPassword(e.target.value)}
-                     className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left transition-all"
+                     className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all"
                      dir="ltr"
                      placeholder="אופציונלי"
                    />
@@ -408,7 +416,7 @@ const App: React.FC = () => {
                    type="text" 
                    value={projectId}
                    onChange={(e) => setProjectId(e.target.value)}
-                   className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left transition-all"
+                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all"
                    dir="ltr"
                    required
                  />
@@ -419,7 +427,7 @@ const App: React.FC = () => {
                    type="text" 
                    value={datasetId}
                    onChange={(e) => setDatasetId(e.target.value)}
-                   className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left transition-all"
+                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all"
                    dir="ltr"
                    required
                  />
@@ -444,7 +452,7 @@ const App: React.FC = () => {
                    type="text" 
                    value={ontology}
                    onChange={(e) => setOntology(e.target.value)}
-                   className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left transition-all"
+                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all"
                    dir="ltr"
                    required
                  />
@@ -455,7 +463,7 @@ const App: React.FC = () => {
                    type="password" 
                    value={timbrToken}
                    onChange={(e) => setTimbrToken(e.target.value)}
-                   className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left transition-all"
+                   className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-gray-400 text-left transition-all"
                    dir="ltr"
                  />
                </div>
@@ -496,248 +504,219 @@ const App: React.FC = () => {
     );
   }
 
-  // Main Dashboard Interface
+  // Dashboard Screen (Connected)
   return (
-    <div className="flex flex-col font-[Heebo] relative">
-      
-      {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-[var(--color-surface-glass)] border-b border-[var(--color-border-glass)] transition-all duration-300">
-        <div className="max-w-[1800px] mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-tr from-[var(--color-primary)] to-[var(--color-secondary)] rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-purple-500/20">G</div>
-            <h1 className="text-2xl font-extrabold text-[var(--color-text-main)] tracking-tight">Data Genius</h1>
-          </div>
-          <div className="flex items-center gap-4">
-             <div className="hidden md:flex flex-col items-end">
-               <span className="text-[10px] uppercase font-bold tracking-widest text-[var(--color-text-muted)] mb-0.5">מקור נתונים</span>
-               <span className="text-xs font-mono bg-[var(--color-surface-200)]/40 px-3 py-1 rounded-full text-[var(--color-text-main)] truncate max-w-[200px] border border-[var(--color-border-glass)] backdrop-blur-sm" 
-                 title={mode === 'odata' ? baseUrl : (mode === 'sql' ? `${projectId}.${datasetId}` : (mode === 'timbr' ? `KG: ${ontology}` : 'קובץ מקומי'))}>
-                 {mode === 'odata' ? baseUrl : (mode === 'sql' ? `${projectId}.${datasetId}` : (mode === 'timbr' ? `Timbr: ${ontology}` : 'קובץ מקומי'))}
-               </span>
-             </div>
+    <div className="min-h-screen bg-[var(--color-surface-100)] font-[Heebo] transition-colors duration-300">
+        {/* Header & Controls */}
+        <header className="sticky top-0 z-50 bg-[var(--color-surface-glass)] backdrop-blur-md border-b border-[var(--color-border-glass)] shadow-sm">
+            <div className="max-w-[1600px] mx-auto px-4 py-3">
+               <div className="flex flex-col gap-4">
+                  
+                  {/* Top Bar */}
+                  <div className="flex justify-between items-center">
+                     <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-purple-500/20 cursor-pointer" onClick={() => setIsConnected(false)}>G</div>
+                        <div className="flex flex-col">
+                            <span className="font-extrabold text-lg text-[var(--color-text-main)] leading-tight">Data Genius</span>
+                            <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                <span className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-bold">
+                                    {mode === 'file' ? 'Local File' : (mode === 'sql' ? 'BigQuery' : (mode === 'timbr' ? 'Timbr KG' : 'OData API'))}
+                                </span>
+                            </div>
+                        </div>
+                     </div>
+                     
+                     <div className="flex items-center gap-2">
+                        <button 
+                            onClick={() => setIsExplorerOpen(true)}
+                            className="p-2 md:px-4 md:py-2 rounded-xl bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-surface-300)] transition-all text-xs font-bold flex items-center gap-2 border border-[var(--color-border-glass)]"
+                            title="סייר נתונים"
+                        >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>
+                            <span className="hidden md:inline">סייר</span>
+                        </button>
+                        
+                        <button 
+                            onClick={() => setIsFavoritesOpen(true)}
+                            className="p-2 rounded-xl bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-surface-300)] transition-all relative border border-[var(--color-border-glass)]"
+                            title="מועדפים"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                            {savedReports.length > 0 && (
+                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full font-bold">{savedReports.length}</span>
+                            )}
+                        </button>
 
-             {/* Theme Toggle Button */}
-             <button 
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className="p-2.5 rounded-xl bg-[var(--color-surface-200)]/20 hover:bg-[var(--color-surface-200)]/40 border border-[var(--color-border-glass)] text-[var(--color-text-main)] transition-all"
-                title={isDarkMode ? "עבור למצב בהיר" : "עבור למצב כהה"}
-             >
-                {isDarkMode ? (
-                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                   </svg>
-                ) : (
-                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                   </svg>
-                )}
-             </button>
-             
-             {/* Favorites Button */}
-             <button
-               onClick={() => setIsFavoritesOpen(true)}
-               className="p-2.5 rounded-xl bg-[var(--color-surface-200)]/20 hover:bg-[var(--color-surface-200)]/40 border border-[var(--color-border-glass)] text-[var(--color-text-main)] transition-all relative"
-               title="דוחות שמורים"
-             >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill={savedReports.length > 0 ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                {savedReports.length > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                    {savedReports.length}
-                  </span>
-                )}
-             </button>
+                        <button 
+                           onClick={() => setIsDarkMode(!isDarkMode)}
+                           className="p-2 rounded-xl bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-surface-300)] transition-all border border-[var(--color-border-glass)]"
+                        >
+                            {isDarkMode ? (
+                               <svg className="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                            ) : (
+                               <svg className="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                            )}
+                        </button>
+                     </div>
+                  </div>
 
-             <button 
-                onClick={() => setIsExplorerOpen(true)}
-                className="flex items-center gap-1.5 text-sm bg-[var(--color-surface-200)]/20 hover:bg-[var(--color-surface-200)]/40 text-[var(--color-text-main)] px-5 py-2.5 rounded-xl transition-all font-medium border border-[var(--color-border-glass)] hover:border-[var(--color-border-glass)]/60 backdrop-blur-sm"
-             >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-                </svg>
-                סייר נתונים
-             </button>
+                  {/* Search / Prompt Bar */}
+                  <div className="w-full max-w-3xl mx-auto space-y-3">
+                      <form onSubmit={handleGenerate} className="relative group flex items-center">
+                           <input 
+                               type="text" 
+                               value={prompt}
+                               onChange={(e) => setPrompt(e.target.value)}
+                               className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] text-[var(--color-text-main)] text-sm rounded-2xl py-4 pr-6 pl-14 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none focus:border-transparent shadow-sm transition-all placeholder-gray-400 group-hover:shadow-md"
+                               placeholder="מה תרצה לדעת על הנתונים? (לדוגמה: 'הצג את סך ההזמנות לפי מדינה בגרף עוגה')"
+                               disabled={isGenerating}
+                           />
+                           
+                           {/* Search Button - Absolute Left */}
+                           <div className="absolute left-2 top-1/2 -translate-y-1/2">
+                               <button 
+                                   type="submit" 
+                                   disabled={!prompt.trim() || isGenerating} 
+                                   className={`p-2.5 rounded-xl text-white transition-all shadow-md flex items-center justify-center
+                                     ${!prompt.trim() || isGenerating ? 'bg-gray-300 dark:bg-slate-700 cursor-not-allowed' : 'bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90'}
+                                   `}
+                               >
+                                   {isGenerating ? (
+                                       <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+                                   ) : (
+                                       <svg className="w-5 h-5 transform rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                                   )}
+                               </button>
+                           </div>
+                      </form>
+                      
+                      {/* Suggestions and other actions outside */}
+                      <div className="flex justify-center gap-2">
+                           <button 
+                               type="button" 
+                               onClick={handleSuggest} 
+                               disabled={isSuggesting || isGenerating}
+                               className="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white transition-all flex items-center gap-2 border border-[var(--color-border-glass)]"
+                           >
+                               {isSuggesting ? (
+                                   <span className="animate-pulse">מייצר...</span>
+                               ) : (
+                                   <>
+                                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                                       <span>הצע דשבורד אוטומטי</span>
+                                   </>
+                               )}
+                           </button>
 
-             <button onClick={() => { setIsConnected(false); setSchema(null); setWidgets([]); setFileData([]); }} className="text-sm text-red-500 hover:text-red-600 font-medium px-2 opacity-70 hover:opacity-100 transition-opacity">התנתק</button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="flex-grow max-w-[1800px] mx-auto px-4 sm:px-6 py-8 w-full z-10">
-        
-        {/* Input Section */}
-        <div className="max-w-4xl mx-auto mb-12 text-center relative">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-[var(--color-text-main)] tracking-tight mb-4 drop-shadow-sm">
-             גלה תובנות <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)]">בלתי נראות</span>
-          </h2>
-          <p className="text-lg text-[var(--color-text-muted)] mb-10 max-w-2xl mx-auto leading-relaxed">
-            האנליסט האישי שלך מוכן לפעולה.
-          </p>
-          
-          <form onSubmit={handleGenerate} className="relative group z-0 mb-8 max-w-3xl mx-auto">
-            <div className="absolute -inset-1 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-700"></div>
-            <div className="relative flex shadow-2xl rounded-2xl overflow-hidden bg-[var(--color-surface-200)]/80 backdrop-blur-xl border border-[var(--color-border-glass)]">
-              <input
-                type="text"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder={mode === 'timbr' ? "שאל על ה-Knowledge Graph (למשל: סך המכירות ללקוח)" : (mode === 'sql' ? "בקש שאילתת SQL..." : "לדוגמה: הצג את סך המכירות לפי קטגוריה...")}
-                className="block w-full p-5 text-lg border-none focus:ring-0 text-[var(--color-text-main)] placeholder-slate-400 bg-transparent"
-                disabled={isGenerating || isSuggesting}
-              />
-              <button
-                type="submit"
-                disabled={isGenerating || isSuggesting || !prompt.trim()}
-                className={`px-8 bg-[var(--color-primary)] hover:bg-[var(--color-secondary)] text-white font-medium text-lg transition-all duration-300 flex items-center gap-2
-                  ${isGenerating ? 'opacity-80 cursor-wait' : ''}`}
-              >
-                {isGenerating ? (
-                   <>
-                     <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                     </svg>
-                   </>
-                ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                )}
-              </button>
+                           <button 
+                               type="button" 
+                               onClick={handleAdvancedInsights} 
+                               disabled={isInsightsLoading || isGenerating}
+                               className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--color-secondary)] to-purple-600 text-white hover:opacity-90 transition-all flex items-center gap-2 shadow-md shadow-purple-500/20"
+                           >
+                               {isInsightsLoading ? (
+                                   <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+                               ) : (
+                                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                               )}
+                               <span>ניתוח חכם</span>
+                           </button>
+                      </div>
+                      
+                      {error && <div className="text-center text-red-500 text-xs bg-red-50/10 p-2 rounded">{error}</div>}
+                  </div>
+               </div>
             </div>
-          </form>
+        </header>
 
-          <div className="flex justify-center gap-3 flex-wrap">
-             <button 
-                onClick={handleSuggest}
-                disabled={isGenerating || isSuggesting}
-                className="group flex items-center gap-2 px-6 py-3 bg-[var(--color-surface-200)]/40 backdrop-blur-md border border-[var(--color-border-glass)] rounded-full text-[var(--color-text-main)] hover:border-[var(--color-primary)] hover:shadow-lg transition-all duration-300 min-w-[220px] justify-center"
-             >
-               {isSuggesting ? (
-                 <>
-                   <svg className="animate-spin h-4 w-4 text-[var(--color-primary)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                   </svg>
-                   <span className="font-semibold text-sm">בונה דשבורד...</span>
-                 </>
-               ) : (
-                 <>
-                   <span className="bg-blue-100/50 text-blue-600 p-1.5 rounded-full group-hover:scale-110 transition-transform">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                   </span>
-                   <span className="font-semibold text-sm">הצע דשבורד אוטומטי</span>
-                 </>
-               )}
-             </button>
+        {/* Main Content */}
+        <main className="max-w-[1600px] mx-auto p-4 md:p-6 space-y-6">
+            <FuturisticBentoGrid 
+               widgets={widgets}
+               baseUrl={mode === 'file' ? 'LOCAL_FILE_MODE' : (mode === 'sql' ? 'BigQuery' : (mode === 'timbr' ? 'Timbr' : baseUrl))}
+               username={username}
+               password={password}
+               connectionParams={connectionParams} // Pass explicit connection details
+               onRemove={handleRemoveWidget}
+               onUpdate={handleUpdateWidget}
+               onDrillDown={(c) => setDrillConfig(c)}
+               fileData={fileData}
+            />
+        </main>
 
-             <button 
-                onClick={handleAdvancedInsights}
-                disabled={isGenerating || isSuggesting}
-                className="group flex items-center gap-2 px-6 py-3 bg-[var(--color-surface-200)]/40 backdrop-blur-md border border-[var(--color-border-glass)] rounded-full text-[var(--color-text-main)] hover:border-[var(--color-secondary)] hover:shadow-lg transition-all duration-300 min-w-[200px] justify-center"
-             >
-               <span className="bg-purple-100/50 text-purple-600 p-1.5 rounded-full group-hover:scale-110 transition-transform">
-                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
-               </span>
-               <span className="font-semibold text-sm">ניתוח עומק (AI)</span>
-             </button>
-          </div>
-
-          {error && (
-            <div className="mt-8 inline-block px-6 py-3 bg-red-50/90 text-red-600 rounded-2xl border border-red-100 text-sm font-medium animate-in slide-in-from-top-2 shadow-sm backdrop-blur-sm">
-              {error}
-            </div>
-          )}
-        </div>
-
-        {/* New Futuristic Grid */}
-        <FuturisticBentoGrid 
-           widgets={widgets}
-           baseUrl={mode === 'file' ? 'LOCAL_FILE_MODE' : (mode === 'sql' ? 'BigQuery' : (mode === 'timbr' ? 'Timbr' : baseUrl))}
-           username={username}
-           password={password}
-           onRemove={handleRemoveWidget}
-           onUpdate={handleUpdateWidget}
-           onDrillDown={(c) => setDrillConfig(c)}
-           fileData={fileData}
-        />
-
-      </main>
-
-      {/* Favorites Modal */}
-      {isFavoritesOpen && (
-         <div className="fixed inset-0 z-[120] bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
-           <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl max-h-[80vh] shadow-2xl flex flex-col animate-in scale-95 duration-200">
-              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                 <h2 className="text-xl font-bold text-slate-800 dark:text-white">דוחות שמורים</h2>
-                 <button onClick={() => setIsFavoritesOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-                    <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                 </button>
-              </div>
-              <div className="p-2 overflow-y-auto flex-1">
-                 {savedReports.length === 0 ? (
-                   <div className="flex flex-col items-center justify-center h-48 text-slate-400">
-                     <svg className="w-12 h-12 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                     <p>אין דוחות שמורים עדיין.</p>
-                   </div>
-                 ) : (
-                   <div className="space-y-2">
-                     {savedReports.map(report => (
-                       <div key={report.id} onClick={() => handleOpenReport(report)} className="p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 cursor-pointer transition-all flex justify-between items-center group">
-                          <div>
-                            <div className="font-bold text-slate-800 dark:text-white">{new Date(report.createdAt).toLocaleDateString('he-IL')} - {new Date(report.createdAt).toLocaleTimeString('he-IL', {hour: '2-digit', minute:'2-digit'})}</div>
-                            <div className="text-sm text-slate-500 line-clamp-1">{report.summary}</div>
-                          </div>
-                          <button onClick={(e) => handleDeleteReport(report.id, e)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors opacity-0 group-hover:opacity-100">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                          </button>
+        {/* Favorites Modal */}
+        {isFavoritesOpen && (
+             <div className="fixed inset-0 z-[120] bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
+               <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl max-h-[80vh] shadow-2xl flex flex-col animate-in scale-95 duration-200">
+                  <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                     <h2 className="text-xl font-bold text-slate-800 dark:text-white">דוחות שמורים</h2>
+                     <button onClick={() => setIsFavoritesOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                        <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                     </button>
+                  </div>
+                  <div className="p-2 overflow-y-auto flex-1">
+                     {savedReports.length === 0 ? (
+                       <div className="flex flex-col items-center justify-center h-48 text-slate-400">
+                         <svg className="w-12 h-12 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                         <p>אין דוחות שמורים עדיין.</p>
                        </div>
-                     ))}
-                   </div>
-                 )}
-              </div>
-           </div>
-         </div>
-      )}
+                     ) : (
+                       <div className="space-y-2">
+                         {savedReports.map(report => (
+                           <div key={report.id} onClick={() => handleOpenReport(report)} className="p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 cursor-pointer transition-all flex justify-between items-center group">
+                              <div>
+                                <div className="font-bold text-slate-800 dark:text-white">{new Date(report.createdAt).toLocaleDateString('he-IL')} - {new Date(report.createdAt).toLocaleTimeString('he-IL', {hour: '2-digit', minute:'2-digit'})}</div>
+                                <div className="text-sm text-slate-500 line-clamp-1">{report.summary}</div>
+                              </div>
+                              <button onClick={(e) => handleDeleteReport(report.id, e)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors opacity-0 group-hover:opacity-100">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                              </button>
+                           </div>
+                         ))}
+                       </div>
+                     )}
+                  </div>
+               </div>
+             </div>
+        )}
 
-      {/* Drill Down Modal */}
-      {drillConfig && (
-        <DrillDownModal 
-           isOpen={!!drillConfig} 
-           config={drillConfig} 
-           baseUrl={baseUrl}
-           username={username}
-           password={password}
-           onClose={() => setDrillConfig(null)} 
+        {/* Drill Down Modal */}
+        {drillConfig && (
+            <DrillDownModal 
+               isOpen={!!drillConfig} 
+               config={drillConfig} 
+               baseUrl={baseUrl}
+               username={username}
+               password={password}
+               onClose={() => setDrillConfig(null)} 
+            />
+        )}
+
+        {/* Data Explorer Modal */}
+        {isExplorerOpen && schema && (
+            <DataExplorerModal
+              isOpen={isExplorerOpen}
+              onClose={() => setIsExplorerOpen(false)}
+              schema={schema}
+              baseUrl={baseUrl}
+              username={username}
+              password={password}
+              localData={mode === 'file' ? fileData : undefined}
+              mode={mode}
+            />
+        )}
+
+        {/* Insights Modal */}
+        <InsightsModal 
+             isOpen={isInsightsOpen}
+             onClose={() => setIsInsightsOpen(false)}
+             analysisResult={analysisResult}
+             loading={isInsightsLoading}
+             onSave={handleSaveReport}
+             isSaved={analysisResult ? savedReports.some(r => r.id === analysisResult.id) : false}
+             onDrillDown={handleInsightsDrillDown}
         />
-      )}
-
-      {/* Data Explorer Modal */}
-      {isExplorerOpen && schema && (
-        <DataExplorerModal
-          isOpen={isExplorerOpen}
-          onClose={() => setIsExplorerOpen(false)}
-          schema={schema}
-          baseUrl={baseUrl}
-          username={username}
-          password={password}
-          localData={mode === 'file' ? fileData : undefined}
-          mode={mode}
-        />
-      )}
-
-      {/* Insights Modal */}
-      <InsightsModal 
-         isOpen={isInsightsOpen}
-         onClose={() => setIsInsightsOpen(false)}
-         analysisResult={analysisResult}
-         loading={isInsightsLoading}
-         onSave={handleSaveReport}
-         isSaved={analysisResult ? savedReports.some(r => r.id === analysisResult.id) : false}
-         onDrillDown={handleInsightsDrillDown}
-      />
     </div>
   );
 };

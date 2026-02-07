@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { DashboardWidgetConfig, ChartType, DataPoint } from '../types';
 import { WidgetCard } from './WidgetCard';
@@ -7,6 +8,8 @@ interface FuturisticBentoGridProps {
   baseUrl: string;
   username?: string;
   password?: string;
+  // Generic connection parameters for SQL/Timbr
+  connectionParams?: { [key: string]: string };
   onRemove: (id: string) => void;
   onUpdate: (id: string, newConfig: Partial<DashboardWidgetConfig>) => void;
   onDrillDown: (config: DashboardWidgetConfig) => void;
@@ -151,6 +154,7 @@ export const FuturisticBentoGrid: React.FC<FuturisticBentoGridProps> = (props) =
                        baseUrl={props.baseUrl} 
                        username={props.username}
                        password={props.password}
+                       connectionParams={props.connectionParams}
                        onRemove={props.onRemove} 
                        onUpdate={props.onUpdate}
                        onDrillDown={props.onDrillDown}

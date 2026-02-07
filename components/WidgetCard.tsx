@@ -16,13 +16,15 @@ interface WidgetCardProps {
   baseUrl: string;
   username?: string;
   password?: string;
+  // Generic connection parameters for SQL/Timbr (ProjectID, Dataset, Ontology, Token etc.)
+  connectionParams?: { [key: string]: string };
   onRemove: (id: string) => void;
   onUpdate: (id: string, newConfig: Partial<DashboardWidgetConfig>) => void;
   onDrillDown: (config: DashboardWidgetConfig) => void;
   _localDataRef?: DataPoint[];
 }
 
-export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, username, password, onRemove, onUpdate, onDrillDown, _localDataRef }) => {
+export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, username, password, connectionParams, onRemove, onUpdate, onDrillDown, _localDataRef }) => {
   const [data, setData] = useState<DataPoint[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   
@@ -38,12 +40,27 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
         let result: DataPoint[] = [];
         
         if (config.sqlQuery) {
-            if (baseUrl === 'Timbr') {
+            // Check based on the "mode" which is passed via baseUrl string hack or we infer from connectionParams
+            // In a cleaner refactor, we would pass 'mode' explicitly. 
+            // Here we detect if we are in Timbr mode if connectionParams has 'ontology'
+            
+            if (connectionParams && connectionParams.ontology) {
                // Timbr Semantic SQL
-               result = await executeMockTimbrQuery(config.sqlQuery);
-            } else {
+               result = await executeMockTimbrQuery(
+                   config.sqlQuery, 
+                   connectionParams.ontology, 
+                   connectionParams.token
+               );
+            } else if (connectionParams && connectionParams.projectId) {
                // Standard SQL / BigQuery Mode
-               result = await executeMockSqlQuery(config.sqlQuery);
+               result = await executeMockSqlQuery(
+                   config.sqlQuery,
+                   connectionParams.projectId,
+                   connectionParams.datasetId
+               );
+            } else {
+               // Fallback / Default Mock
+               result = await executeMockSqlQuery(config.sqlQuery, 'mock-project', 'mock-dataset');
             }
         } else if (baseUrl === 'LOCAL_FILE_MODE') {
              if (_localDataRef) {
@@ -63,7 +80,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
     };
     loadData();
     return () => { isMounted = false; };
-  }, [config.odataQuery, config.sqlQuery, baseUrl, username, password, _localDataRef]);
+  }, [config.odataQuery, config.sqlQuery, baseUrl, username, password, connectionParams, _localDataRef]);
 
   // Keys
   const hasActualTarget = data.length > 0 && 'target' in data[0];
@@ -286,8 +303,8 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
                     </div>
                     
                     {config.sqlQuery && (
-                         <div title={config.sqlQuery} className={`text-[10px] px-2 py-1 rounded cursor-help font-mono max-w-[100px] truncate ${baseUrl === 'Timbr' ? 'bg-purple-500/10 text-purple-500' : 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'}`}>
-                            {baseUrl === 'Timbr' ? 'KG-SQL' : 'SQL'}
+                         <div title={config.sqlQuery} className={`text-[10px] px-2 py-1 rounded cursor-help font-mono max-w-[100px] truncate ${connectionParams?.ontology ? 'bg-purple-500/10 text-purple-500' : 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'}`}>
+                            {connectionParams?.ontology ? 'KG-SQL' : 'SQL'}
                          </div>
                     )}
                     
@@ -324,8 +341,8 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
             {/* SQL Indicator */}
             {config.sqlQuery && (
                <div className="group/sql relative">
-                 <div className={`text-[10px] font-mono font-bold border px-2 py-1 rounded cursor-help ${baseUrl === 'Timbr' ? 'text-purple-500 border-purple-500/30 bg-purple-500/5' : 'text-[var(--color-primary)] border-[var(--color-primary)]/30 bg-[var(--color-primary)]/5'}`}>
-                    {baseUrl === 'Timbr' ? 'KG' : 'SQL'}
+                 <div className={`text-[10px] font-mono font-bold border px-2 py-1 rounded cursor-help ${connectionParams?.ontology ? 'text-purple-500 border-purple-500/30 bg-purple-500/5' : 'text-[var(--color-primary)] border-[var(--color-primary)]/30 bg-[var(--color-primary)]/5'}`}>
+                    {connectionParams?.ontology ? 'KG' : 'SQL'}
                  </div>
                  <div className="absolute top-8 left-0 w-64 p-3 bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 group-hover/sql:opacity-100 pointer-events-none transition-opacity z-50 font-mono">
                    {config.sqlQuery}

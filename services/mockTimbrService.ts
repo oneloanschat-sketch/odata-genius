@@ -3,10 +3,33 @@ import { DataPoint } from '../types';
 
 /**
  * Simulates executing a Semantic SQL query against a Timbr Knowledge Graph.
+ * 
+ * --- REAL IMPLEMENTATION NOTE ---
+ * Browsers cannot connect directly to Timbr via JDBC/ODBC.
+ * You must use a backend proxy (Node.js/Python) or Timbr's REST API if enabled and CORS configured.
+ * 
+ * Example Backend Call:
+ * 
+ * export const executeRealTimbrQuery = async (query: string, ontology: string, token: string): Promise<DataPoint[]> => {
+ *   const response = await fetch('https://YOUR-TIMBR-INSTANCE.com/api/v1/query', {
+ *     method: 'POST',
+ *     headers: { 
+ *       'Content-Type': 'application/json',
+ *       'Authorization': `Bearer ${token}`
+ *     },
+ *     body: JSON.stringify({ ontology, query })
+ *   });
+ *   return await response.json();
+ * };
  */
-export const executeMockTimbrQuery = async (query: string): Promise<DataPoint[]> => {
+export const executeMockTimbrQuery = async (query: string, ontology?: string, token?: string): Promise<DataPoint[]> => {
   // Simulate network latency
   await new Promise(resolve => setTimeout(resolve, 1000));
+
+  // Log to console to show we received the real credentials
+  console.log(`[Timbr Service] Executing on Ontology: ${ontology}`);
+  console.log(`[Timbr Token]: ${token ? '******' : 'None'}`);
+  console.log(`[Timbr Query]: ${query}`);
 
   const lower = query.toLowerCase();
 

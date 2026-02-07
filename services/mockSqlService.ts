@@ -3,11 +3,29 @@ import { DataPoint } from '../types';
 
 /**
  * Simulates executing a SQL query against BigQuery.
- * In a real app, this would call a backend proxy that holds the Service Account credentials.
+ * 
+ * --- REAL IMPLEMENTATION NOTE ---
+ * Browsers cannot connect directly to BigQuery due to security and CORS.
+ * You must use a backend proxy (Node.js/Python).
+ * 
+ * Example Backend Call:
+ * 
+ * export const executeRealSqlQuery = async (query: string, projectId: string, datasetId: string): Promise<DataPoint[]> => {
+ *   const response = await fetch('https://YOUR-BACKEND-API.com/api/bigquery/execute', {
+ *     method: 'POST',
+ *     headers: { 'Content-Type': 'application/json' },
+ *     body: JSON.stringify({ query, projectId, datasetId })
+ *   });
+ *   return await response.json();
+ * };
  */
-export const executeMockSqlQuery = async (query: string): Promise<DataPoint[]> => {
+export const executeMockSqlQuery = async (query: string, projectId?: string, datasetId?: string): Promise<DataPoint[]> => {
   // Simulate network latency
   await new Promise(resolve => setTimeout(resolve, 800));
+
+  // Log to console to show we received the real credentials
+  console.log(`[SQL Service] Executing on Project: ${projectId}, Dataset: ${datasetId}`);
+  console.log(`[SQL Query]: ${query}`);
 
   const lower = query.toLowerCase();
 
