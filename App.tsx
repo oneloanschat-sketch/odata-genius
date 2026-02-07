@@ -509,25 +509,25 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-[var(--color-surface-100)] font-[Heebo] transition-colors duration-300">
         {/* Header & Controls */}
         <header className="sticky top-0 z-50 bg-[var(--color-surface-glass)] backdrop-blur-md border-b border-[var(--color-border-glass)] shadow-sm">
-            <div className="max-w-[1600px] mx-auto px-4 py-3">
-               <div className="flex flex-col gap-4">
+            <div className="max-w-[1600px] mx-auto px-4 py-2">
+               <div className="flex flex-col gap-2">
                   
-                  {/* Top Bar - Stack on mobile, row on desktop */}
-                  <div className="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-0">
-                     <div className="flex items-center gap-3 w-full md:w-auto justify-center md:justify-start">
-                        <div className="w-10 h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-purple-500/20 cursor-pointer" onClick={() => setIsConnected(false)}>G</div>
+                  {/* Top Row: Logo, Title, Actions (Merged for Mobile) */}
+                  <div className="flex flex-row justify-between items-center w-full">
+                     <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-purple-500/20 cursor-pointer" onClick={() => setIsConnected(false)}>G</div>
                         <div className="flex flex-col">
-                            <span className="font-extrabold text-lg text-[var(--color-text-main)] leading-tight">Data Genius</span>
-                            <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                                <span className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-bold">
-                                    {mode === 'file' ? 'Local File' : (mode === 'sql' ? 'BigQuery' : (mode === 'timbr' ? 'Timbr KG' : 'OData API'))}
+                            <span className="font-extrabold text-sm md:text-lg text-[var(--color-text-main)] leading-tight">Data Genius</span>
+                            <div className="flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                <span className="text-[9px] md:text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-bold">
+                                    {mode === 'file' ? 'File' : (mode === 'sql' ? 'BQ' : (mode === 'timbr' ? 'KG' : 'API'))}
                                 </span>
                             </div>
                         </div>
                      </div>
                      
-                     <div className="flex items-center gap-2 w-full md:w-auto justify-center">
+                     <div className="flex items-center gap-1">
                         <button 
                             onClick={() => setIsExplorerOpen(true)}
                             className="p-2 md:px-4 md:py-2 rounded-xl bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-surface-300)] transition-all text-xs font-bold flex items-center gap-2 border border-[var(--color-border-glass)] justify-center"
@@ -568,7 +568,7 @@ const App: React.FC = () => {
                                type="text" 
                                value={prompt}
                                onChange={(e) => setPrompt(e.target.value)}
-                               className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] text-[var(--color-text-main)] text-sm rounded-2xl py-3 md:py-4 pr-6 pl-14 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none focus:border-transparent shadow-sm transition-all placeholder-gray-400 group-hover:shadow-md text-base"
+                               className="w-full bg-[var(--color-surface-100)] border border-[var(--color-border-glass)] text-[var(--color-text-main)] text-sm rounded-2xl py-2 md:py-4 pr-6 pl-14 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none focus:border-transparent shadow-sm transition-all placeholder-gray-400 group-hover:shadow-md text-base"
                                placeholder="מה תרצה לדעת על הנתונים? (לדוגמה: 'הצג את סך ההזמנות לפי מדינה בגרף עוגה')"
                                disabled={isGenerating}
                            />
@@ -578,14 +578,14 @@ const App: React.FC = () => {
                                <button 
                                    type="submit" 
                                    disabled={!prompt.trim() || isGenerating} 
-                                   className={`p-2.5 rounded-xl text-white transition-all shadow-md flex items-center justify-center
+                                   className={`p-2 md:p-2.5 rounded-xl text-white transition-all shadow-md flex items-center justify-center
                                      ${!prompt.trim() || isGenerating ? 'bg-gray-300 dark:bg-slate-700 cursor-not-allowed' : 'bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90'}
                                    `}
                                >
                                    {isGenerating ? (
-                                       <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+                                       <svg className="animate-spin h-4 w-4 md:h-5 md:w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
                                    ) : (
-                                       <svg className="w-5 h-5 transform rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                                       <svg className="w-4 h-4 md:w-5 md:h-5 transform rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
                                    )}
                                </button>
                            </div>
@@ -597,13 +597,13 @@ const App: React.FC = () => {
                                type="button" 
                                onClick={handleSuggest} 
                                disabled={isSuggesting || isGenerating}
-                               className="flex-1 px-2 py-2.5 rounded-xl text-xs font-bold bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white transition-all flex items-center justify-center gap-2 border border-[var(--color-border-glass)]"
+                               className="flex-1 px-2 py-1.5 md:py-2.5 rounded-xl text-xs font-bold bg-[var(--color-surface-200)] text-[var(--color-text-main)] hover:bg-[var(--color-primary)] hover:text-white transition-all flex items-center justify-center gap-2 border border-[var(--color-border-glass)]"
                            >
                                {isSuggesting ? (
                                    <span className="animate-pulse">מייצר...</span>
                                ) : (
                                    <>
-                                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                                       <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
                                        <span className="truncate">הצע דשבורד</span>
                                    </>
                                )}
@@ -613,12 +613,12 @@ const App: React.FC = () => {
                                type="button" 
                                onClick={handleAdvancedInsights} 
                                disabled={isInsightsLoading || isGenerating}
-                               className="flex-1 px-2 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--color-secondary)] to-purple-600 text-white hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-md shadow-purple-500/20"
+                               className="flex-1 px-2 py-1.5 md:py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--color-secondary)] to-purple-600 text-white hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-md shadow-purple-500/20"
                            >
                                {isInsightsLoading ? (
-                                   <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+                                   <svg className="animate-spin h-3.5 w-3.5 md:h-4 md:w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
                                ) : (
-                                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                   <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                                )}
                                <span className="truncate">ניתוח חכם</span>
                            </button>

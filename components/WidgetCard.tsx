@@ -196,7 +196,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
   const renderChart = () => {
     if (loading) {
       return (
-        <div className="flex-1 flex items-center justify-center min-h-[180px]">
+        <div className="flex-1 flex items-center justify-center min-h-[160px]">
            <div className="flex flex-col items-center gap-2">
             <svg className="w-8 h-8 animate-spin text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -210,7 +210,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
 
     if (processedData.length === 0) {
       return (
-        <div className="flex-1 flex flex-col items-center justify-center min-h-[180px] text-[var(--color-text-muted)] border border-dashed border-[var(--color-border-glass)] rounded-lg m-2 bg-white/5">
+        <div className="flex-1 flex flex-col items-center justify-center min-h-[160px] text-[var(--color-text-muted)] border border-dashed border-[var(--color-border-glass)] rounded-lg m-2 bg-white/5">
            <svg className="w-8 h-8 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
            <span className="text-sm font-medium">אין נתונים להצגה</span>
         </div>
@@ -223,7 +223,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
         
       case ChartType.LINE:
         return (
-          <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+          <ResponsiveContainer width="100%" height="100%" minHeight={150}>
             <LineChart data={processedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               {renderDefs(config.id)}
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-glass)" strokeOpacity={0.5} />
@@ -249,15 +249,15 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
         );
       case ChartType.PIE:
         return (
-          <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+          <ResponsiveContainer width="100%" height="100%" minHeight={150}>
             <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               {renderDefs(config.id)}
               <Pie
                 data={processedData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60} // Donut Style
-                outerRadius={80}
+                innerRadius={50} // Donut Style
+                outerRadius={70}
                 paddingAngle={4}
                 dataKey={mainKey}
                 nameKey={xKey}
@@ -279,7 +279,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
         );
       case ChartType.AREA:
         return (
-          <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+          <ResponsiveContainer width="100%" height="100%" minHeight={150}>
             <AreaChart data={processedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               {renderDefs(config.id)}
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-glass)" strokeOpacity={0.5} />
@@ -301,8 +301,8 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
       case ChartType.BAR:
       default:
         return (
-          <ResponsiveContainer width="100%" height="100%" minHeight={200}>
-            <BarChart data={processedData} barSize={28} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <ResponsiveContainer width="100%" height="100%" minHeight={150}>
+            <BarChart data={processedData} barSize={20} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               {renderDefs(config.id)}
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-glass)" strokeOpacity={0.5} />
               <XAxis dataKey={xKey} tick={axisStyle} tickLine={false} axisLine={false} dy={10} />
@@ -390,8 +390,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
   // Standard Render for Charts
   return (
     <div 
-      className="bg-[var(--color-surface-glass)]/60 backdrop-blur-xl rounded-3xl shadow-lg border border-[var(--color-border-glass)] flex flex-col relative group transition-all duration-300 hover:shadow-2xl hover:border-[var(--color-primary)]/30 overflow-hidden h-full"
-      style={{ minHeight: '360px' }}
+      className="bg-[var(--color-surface-glass)]/60 backdrop-blur-xl rounded-3xl shadow-lg border border-[var(--color-border-glass)] flex flex-col relative group transition-all duration-300 hover:shadow-2xl hover:border-[var(--color-primary)]/30 overflow-hidden h-full min-h-[260px] md:min-h-[360px]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -417,7 +416,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
             )}
 
             {/* Search/Filter Toggle - Expanded on mobile if active, compressed otherwise */}
-            <div className={`relative transition-all duration-300 ${isHovered || filterValue ? 'w-32 md:w-40 opacity-100' : 'w-8 opacity-0 pointer-events-none'}`}>
+            <div className={`relative transition-all duration-300 ${isHovered || filterValue ? 'w-24 md:w-40 opacity-100' : 'w-8 opacity-0 pointer-events-none'}`}>
                 <input 
                     type="text" 
                     value={filterValue}
@@ -442,7 +441,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
       </div>
 
       {/* Main Chart Area */}
-      <div className="flex-1 p-2 md:p-4 w-full min-h-[300px]">
+      <div className="flex-1 p-2 md:p-4 w-full min-h-[160px]">
          {renderChart()}
       </div>
 
