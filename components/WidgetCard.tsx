@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useMemo } from 'react';
 import { 
   BarChart, Bar, LineChart, Line, PieChart, Pie, AreaChart, Area, 
@@ -6,6 +7,8 @@ import {
 import { DashboardWidgetConfig, ChartType, DataPoint, AlertConfig } from '../types';
 import { executeODataQuery } from '../services/odataService';
 import { executeLocalQuery } from '../services/fileService';
+import { executeMockSqlQuery } from '../services/mockSqlService';
+import { executeMockTimbrQuery } from '../services/mockTimbrService';
 import { COLORS } from '../constants';
 
 interface WidgetCardProps {
@@ -34,11 +37,20 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
       try {
         let result: DataPoint[] = [];
         
-        if (baseUrl === 'LOCAL_FILE_MODE') {
+        if (config.sqlQuery) {
+            if (baseUrl === 'Timbr') {
+               // Timbr Semantic SQL
+               result = await executeMockTimbrQuery(config.sqlQuery);
+            } else {
+               // Standard SQL / BigQuery Mode
+               result = await executeMockSqlQuery(config.sqlQuery);
+            }
+        } else if (baseUrl === 'LOCAL_FILE_MODE') {
              if (_localDataRef) {
                  result = executeLocalQuery(_localDataRef, config.odataQuery);
              }
         } else {
+             // OData Mode
              result = await executeODataQuery(baseUrl, config.odataQuery, username, password);
         }
 
@@ -51,7 +63,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
     };
     loadData();
     return () => { isMounted = false; };
-  }, [config.odataQuery, baseUrl, username, password, _localDataRef]);
+  }, [config.odataQuery, config.sqlQuery, baseUrl, username, password, _localDataRef]);
 
   // Keys
   const hasActualTarget = data.length > 0 && 'target' in data[0];
@@ -75,22 +87,25 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
       });
     }
 
-    // 2. Client-side Aggregation (Grouping)
+    // 2. Client-side Aggregation (Grouping) - Only needed for OData/File where we fetch raw data
+    // If it's SQL, we assume the DB did the aggregation if the query was GROUP BY
+    // But for safety, we keep this logic if the SQL returned raw rows.
     if (result.length > 0 && xKey && mainKey) {
-        const groupedMap = new Map<string, number>();
-        let hasDuplicates = false;
+        // Check if data is already aggregated (unique keys)
         const keySet = new Set<string>();
-
+        let needsAggregation = false;
+        
         for (const item of result) {
             const key = String(item[xKey]);
             if (keySet.has(key)) {
-                hasDuplicates = true;
+                needsAggregation = true;
                 break;
             }
             keySet.add(key);
         }
 
-        if (hasDuplicates) {
+        if (needsAggregation) {
+            const groupedMap = new Map<string, number>();
             result.forEach(item => {
                 const key = String(item[xKey]);
                 let val = Number(item[mainKey]);
@@ -270,6 +285,12 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
                         <span>פעיל</span>
                     </div>
                     
+                    {config.sqlQuery && (
+                         <div title={config.sqlQuery} className={`text-[10px] px-2 py-1 rounded cursor-help font-mono max-w-[100px] truncate ${baseUrl === 'Timbr' ? 'bg-purple-500/10 text-purple-500' : 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'}`}>
+                            {baseUrl === 'Timbr' ? 'KG-SQL' : 'SQL'}
+                         </div>
+                    )}
+                    
                     <button 
                         onClick={() => onDrillDown(config)}
                         className="text-xs text-[var(--color-primary)] font-bold hover:underline opacity-80 hover:opacity-100 flex items-center gap-1"
@@ -298,10 +319,20 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
           <p className="text-xs text-[var(--color-text-muted)] mt-1 line-clamp-1">{config.description}</p>
         </div>
         
-        {/* RTL: Flex-row works left-to-right by default, but dir=rtl flips it. 
-            So first item is Rightmost, Last item is Leftmost.
-            We want Actions on the Left. */}
+        {/* Actions */}
         <div className="flex items-center gap-2">
+            {/* SQL Indicator */}
+            {config.sqlQuery && (
+               <div className="group/sql relative">
+                 <div className={`text-[10px] font-mono font-bold border px-2 py-1 rounded cursor-help ${baseUrl === 'Timbr' ? 'text-purple-500 border-purple-500/30 bg-purple-500/5' : 'text-[var(--color-primary)] border-[var(--color-primary)]/30 bg-[var(--color-primary)]/5'}`}>
+                    {baseUrl === 'Timbr' ? 'KG' : 'SQL'}
+                 </div>
+                 <div className="absolute top-8 left-0 w-64 p-3 bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 group-hover/sql:opacity-100 pointer-events-none transition-opacity z-50 font-mono">
+                   {config.sqlQuery}
+                 </div>
+               </div>
+            )}
+
             {/* Search/Filter Toggle */}
             <div className={`relative transition-all duration-300 ${isHovered || filterValue ? 'w-40 opacity-100' : 'w-8 opacity-0 pointer-events-none'}`}>
                 <input 

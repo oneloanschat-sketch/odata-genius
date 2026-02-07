@@ -1,5 +1,5 @@
 {
-  "name": "OData Dashboard Genius",
-  "description": "An AI-powered dashboard builder that converts natural language requests in Hebrew into visual dashboards using OData concepts.",
+  "name": "Data Genius",
+  "description": "An AI-powered dashboard builder that converts natural language requests in Hebrew into visual dashboards using various data sources.",
   "requestFramePermissions": []
 }

@@ -8,11 +8,12 @@ import { DrillDownModal } from './components/DrillDownModal';
 import { DataExplorerModal } from './components/DataExplorerModal';
 import { InsightsModal } from './components/InsightsModal';
 import { DashboardWidgetConfig, DatabaseSchema, DataPoint, AnalysisResult, ChartType } from './types';
+import { MOCK_SCHEMA, MOCK_KG_SCHEMA } from './constants';
 
 // Use a known public OData service for demo purposes if user has none
 const DEFAULT_ODATA_URL = "https://services.odata.org/V4/Northwind/Northwind.svc";
 
-type ConnectionMode = 'odata' | 'file';
+type ConnectionMode = 'odata' | 'file' | 'sql' | 'timbr';
 
 const App: React.FC = () => {
   // Theme State (Default to true for Dark Mode)
@@ -26,6 +27,14 @@ const App: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   
+  // SQL State
+  const [projectId, setProjectId] = useState('my-gcp-project');
+  const [datasetId, setDatasetId] = useState('analytics_data');
+
+  // Timbr State
+  const [ontology, setOntology] = useState('ecommerce_kg');
+  const [timbrToken, setTimbrToken] = useState('');
+
   // File State
   const [fileData, setFileData] = useState<DataPoint[]>([]);
 
@@ -83,8 +92,11 @@ const App: React.FC = () => {
   const executeQuery = async (query: string): Promise<DataPoint[]> => {
     if (mode === 'odata') {
       return await executeODataQuery(baseUrl, query, username, password);
-    } else {
+    } else if (mode === 'file') {
       return executeLocalQuery(fileData, query);
+    } else {
+      // SQL / Timbr Mode mock check
+      return []; 
     }
   };
 
@@ -93,11 +105,21 @@ const App: React.FC = () => {
     setIsConnecting(true);
     setError(null);
     try {
-      const fetchedSchema = await fetchServiceSchema(baseUrl, username, password);
-      setSchema(fetchedSchema);
+      if (mode === 'odata') {
+          const fetchedSchema = await fetchServiceSchema(baseUrl, username, password);
+          setSchema(fetchedSchema);
+      } else if (mode === 'sql') {
+          // Mock connection for SQL
+          await new Promise(r => setTimeout(r, 1000));
+          setSchema(MOCK_SCHEMA); 
+      } else if (mode === 'timbr') {
+          // Mock connection for Timbr Knowledge Graph
+          await new Promise(r => setTimeout(r, 1000));
+          setSchema(MOCK_KG_SCHEMA);
+      }
       setIsConnected(true);
     } catch (err: any) {
-      setError(err.message || "Failed to connect to OData service");
+      setError(err.message || "Failed to connect to service");
     } finally {
       setIsConnecting(false);
     }
@@ -124,7 +146,7 @@ const App: React.FC = () => {
     if (!schema) return;
     setIsSuggesting(true); // Specific loader
     try {
-      const suggestions = await suggestDashboards(schema);
+      const suggestions = await suggestDashboards(schema, mode);
       setWidgets(prev => [...suggestions, ...prev]);
     } catch (err: any) {
       console.error(err);
@@ -143,14 +165,15 @@ const App: React.FC = () => {
     try {
       // Fetch a sample of data to send to AI
       let dataSample: DataPoint[] = [];
-      // Use the first entity as connection point for general insights
-      // In a real app we might ask user which entity to analyze
       const entity = schema.entities[0].name;
 
       if (mode === 'odata') {
          dataSample = await executeODataQuery(baseUrl, `/${entity}?$top=50`, username, password);
-      } else {
+      } else if (mode === 'file') {
          dataSample = fileData.slice(0, 50);
+      } else {
+         // SQL / Timbr Mock Sample
+         dataSample = [{name: 'Sample A', value: 100}, {name: 'Sample B', value: 200}];
       }
 
       const result = await generateAdvancedInsights(schema, dataSample, entity);
@@ -211,17 +234,20 @@ const App: React.FC = () => {
     setError(null);
 
     try {
-      const newWidgetConfig = await generateDashboardConfig(prompt, schema);
+      const newWidgetConfig = await generateDashboardConfig(prompt, schema, mode);
       
-      // Validation / Dry Run
-      const validationData = await executeQuery(newWidgetConfig.odataQuery);
-      
-      if (!validationData || validationData.length === 0) {
-        setError(`לא נמצאו נתונים עבור הבקשה: "${newWidgetConfig.title}". נסה לנסח אחרת.`);
-      } else {
-        setWidgets(prev => [newWidgetConfig, ...prev]);
-        setPrompt('');
+      // For SQL/Timbr we skip validation in this demo as we mock it
+      if (mode === 'odata' || mode === 'file') {
+          const validationData = await executeQuery(newWidgetConfig.odataQuery);
+          if (!validationData || validationData.length === 0) {
+            setError(`לא נמצאו נתונים עבור הבקשה: "${newWidgetConfig.title}". נסה לנסח אחרת.`);
+            setIsGenerating(false);
+            return;
+          }
       }
+
+      setWidgets(prev => [newWidgetConfig, ...prev]);
+      setPrompt('');
 
     } catch (err: any) {
       console.error(err);
@@ -255,7 +281,7 @@ const App: React.FC = () => {
                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                </svg>
             ) : (
-               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                </svg>
             )}
@@ -269,11 +295,11 @@ const App: React.FC = () => {
           <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-2xl flex items-center justify-center text-white font-bold text-3xl mx-auto mb-6 shadow-lg shadow-purple-500/30">
             G
           </div>
-          <h1 className="text-3xl font-extrabold text-[var(--color-text-main)] mb-2 tracking-tight">OData Genius</h1>
+          <h1 className="text-3xl font-extrabold text-[var(--color-text-main)] mb-2 tracking-tight">Data Genius</h1>
           <p className="text-[var(--color-text-muted)] mb-8">הדור הבא של ניתוח נתונים ויזואלי</p>
           
           {/* Tabs - Now resets state on switch */}
-          <div className="flex p-1 bg-[var(--color-surface-200)]/50 rounded-xl mb-6 border border-[var(--color-border-glass)]">
+          <div className="flex p-1 bg-[var(--color-surface-200)]/50 rounded-xl mb-6 border border-[var(--color-border-glass)] gap-1">
              <button 
                 onClick={() => {
                    setMode('odata');
@@ -284,7 +310,31 @@ const App: React.FC = () => {
                 }}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === 'odata' ? 'bg-[var(--color-surface-100)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
              >
-               API (OData)
+               API
+             </button>
+             <button 
+                onClick={() => {
+                   setMode('sql');
+                   setIsConnected(false);
+                   setSchema(null);
+                   setWidgets([]);
+                   setFileData([]);
+                }}
+                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === 'sql' ? 'bg-[var(--color-surface-100)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
+             >
+               BigQuery
+             </button>
+             <button 
+                onClick={() => {
+                   setMode('timbr');
+                   setIsConnected(false);
+                   setSchema(null);
+                   setWidgets([]);
+                   setFileData([]);
+                }}
+                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === 'timbr' ? 'bg-[var(--color-surface-100)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
+             >
+               Timbr KG
              </button>
              <button 
                 onClick={() => {
@@ -296,11 +346,11 @@ const App: React.FC = () => {
                 }}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === 'file' ? 'bg-[var(--color-surface-100)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
              >
-               קובץ (Excel/CSV)
+               קובץ
              </button>
           </div>
 
-          {mode === 'odata' ? (
+          {mode === 'odata' && (
             <form onSubmit={handleConnect} className="space-y-4 text-right">
                <div>
                  <label className="block text-xs font-bold text-[var(--color-text-muted)] mb-1 uppercase tracking-wider">כתובת ה-API</label>
@@ -308,7 +358,7 @@ const App: React.FC = () => {
                    type="url" 
                    value={baseUrl}
                    onChange={(e) => setBaseUrl(e.target.value)}
-                   className="w-full bg-[var(--color-surface-100)]/80 border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-[var(--color-text-muted)]/50 text-left transition-all"
+                   className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left transition-all"
                    dir="ltr"
                    required
                  />
@@ -321,7 +371,7 @@ const App: React.FC = () => {
                      type="text" 
                      value={username}
                      onChange={(e) => setUsername(e.target.value)}
-                     className="w-full bg-[var(--color-surface-100)]/80 border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-[var(--color-text-muted)]/50 text-left transition-all"
+                     className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left transition-all"
                      dir="ltr"
                      placeholder="אופציונלי"
                    />
@@ -332,7 +382,7 @@ const App: React.FC = () => {
                      type="password" 
                      value={password}
                      onChange={(e) => setPassword(e.target.value)}
-                     className="w-full bg-[var(--color-surface-100)]/80 border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-[var(--color-text-muted)]/50 text-left transition-all"
+                     className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left transition-all"
                      dir="ltr"
                      placeholder="אופציונלי"
                    />
@@ -348,7 +398,80 @@ const App: React.FC = () => {
                  התחבר למערכת
                </button>
             </form>
-          ) : (
+          )}
+          
+          {mode === 'sql' && (
+            <form onSubmit={handleConnect} className="space-y-4 text-right">
+               <div>
+                 <label className="block text-xs font-bold text-[var(--color-text-muted)] mb-1 uppercase tracking-wider">Project ID</label>
+                 <input 
+                   type="text" 
+                   value={projectId}
+                   onChange={(e) => setProjectId(e.target.value)}
+                   className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left transition-all"
+                   dir="ltr"
+                   required
+                 />
+               </div>
+               <div>
+                 <label className="block text-xs font-bold text-[var(--color-text-muted)] mb-1 uppercase tracking-wider">Dataset Name</label>
+                 <input 
+                   type="text" 
+                   value={datasetId}
+                   onChange={(e) => setDatasetId(e.target.value)}
+                   className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left transition-all"
+                   dir="ltr"
+                   required
+                 />
+               </div>
+               
+               <button 
+                 type="submit" 
+                 disabled={isConnecting}
+                 className="w-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:opacity-90 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-purple-500/20 flex justify-center items-center gap-2 mt-2"
+               >
+                 {isConnecting && <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>}
+                 התחבר ל-BigQuery
+               </button>
+            </form>
+          )}
+          
+          {mode === 'timbr' && (
+            <form onSubmit={handleConnect} className="space-y-4 text-right">
+               <div>
+                 <label className="block text-xs font-bold text-[var(--color-text-muted)] mb-1 uppercase tracking-wider">Ontology Name</label>
+                 <input 
+                   type="text" 
+                   value={ontology}
+                   onChange={(e) => setOntology(e.target.value)}
+                   className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left transition-all"
+                   dir="ltr"
+                   required
+                 />
+               </div>
+               <div>
+                 <label className="block text-xs font-bold text-[var(--color-text-muted)] mb-1 uppercase tracking-wider">Token / Password</label>
+                 <input 
+                   type="password" 
+                   value={timbrToken}
+                   onChange={(e) => setTimbrToken(e.target.value)}
+                   className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left transition-all"
+                   dir="ltr"
+                 />
+               </div>
+               
+               <button 
+                 type="submit" 
+                 disabled={isConnecting}
+                 className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-purple-500/20 flex justify-center items-center gap-2 mt-2"
+               >
+                 {isConnecting && <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>}
+                 התחבר ל-Timbr.ai
+               </button>
+            </form>
+          )}
+
+          {mode === 'file' && (
             <div className="border-2 border-dashed border-[var(--color-text-muted)]/30 rounded-2xl p-8 flex flex-col items-center justify-center hover:bg-[var(--color-surface-200)]/30 transition-all cursor-pointer relative group">
                <input 
                  type="file" 
@@ -382,13 +505,14 @@ const App: React.FC = () => {
         <div className="max-w-[1800px] mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-tr from-[var(--color-primary)] to-[var(--color-secondary)] rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-purple-500/20">G</div>
-            <h1 className="text-2xl font-extrabold text-[var(--color-text-main)] tracking-tight">OData Genius</h1>
+            <h1 className="text-2xl font-extrabold text-[var(--color-text-main)] tracking-tight">Data Genius</h1>
           </div>
           <div className="flex items-center gap-4">
              <div className="hidden md:flex flex-col items-end">
                <span className="text-[10px] uppercase font-bold tracking-widest text-[var(--color-text-muted)] mb-0.5">מקור נתונים</span>
-               <span className="text-xs font-mono bg-[var(--color-surface-200)]/40 px-3 py-1 rounded-full text-[var(--color-text-main)] truncate max-w-[200px] border border-[var(--color-border-glass)] backdrop-blur-sm" title={mode === 'odata' ? baseUrl : 'קובץ מקומי'}>
-                 {mode === 'odata' ? baseUrl : 'קובץ מקומי'}
+               <span className="text-xs font-mono bg-[var(--color-surface-200)]/40 px-3 py-1 rounded-full text-[var(--color-text-main)] truncate max-w-[200px] border border-[var(--color-border-glass)] backdrop-blur-sm" 
+                 title={mode === 'odata' ? baseUrl : (mode === 'sql' ? `${projectId}.${datasetId}` : (mode === 'timbr' ? `KG: ${ontology}` : 'קובץ מקומי'))}>
+                 {mode === 'odata' ? baseUrl : (mode === 'sql' ? `${projectId}.${datasetId}` : (mode === 'timbr' ? `Timbr: ${ontology}` : 'קובץ מקומי'))}
                </span>
              </div>
 
@@ -459,7 +583,7 @@ const App: React.FC = () => {
                 type="text"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="לדוגמה: הצג את סך המכירות לפי קטגוריה..."
+                placeholder={mode === 'timbr' ? "שאל על ה-Knowledge Graph (למשל: סך המכירות ללקוח)" : (mode === 'sql' ? "בקש שאילתת SQL..." : "לדוגמה: הצג את סך המכירות לפי קטגוריה...")}
                 className="block w-full p-5 text-lg border-none focus:ring-0 text-[var(--color-text-main)] placeholder-slate-400 bg-transparent"
                 disabled={isGenerating || isSuggesting}
               />
@@ -531,7 +655,7 @@ const App: React.FC = () => {
         {/* New Futuristic Grid */}
         <FuturisticBentoGrid 
            widgets={widgets}
-           baseUrl={mode === 'file' ? 'LOCAL_FILE_MODE' : baseUrl}
+           baseUrl={mode === 'file' ? 'LOCAL_FILE_MODE' : (mode === 'sql' ? 'BigQuery' : (mode === 'timbr' ? 'Timbr' : baseUrl))}
            username={username}
            password={password}
            onRemove={handleRemoveWidget}
@@ -600,6 +724,7 @@ const App: React.FC = () => {
           username={username}
           password={password}
           localData={mode === 'file' ? fileData : undefined}
+          mode={mode}
         />
       )}
 

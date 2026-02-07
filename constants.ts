@@ -1,3 +1,4 @@
+
 import { DatabaseSchema, ChartType } from './types';
 
 // This schema helps the AI understand what data is available to query.
@@ -32,6 +33,42 @@ export const MOCK_SCHEMA: DatabaseSchema = {
         { name: 'Department', type: 'string' },
         { name: 'SalesTarget', type: 'number' },
         { name: 'ActualSales', type: 'number' }
+      ]
+    }
+  ]
+};
+
+// Mock Ontology / Knowledge Graph Schema for Timbr
+export const MOCK_KG_SCHEMA: DatabaseSchema = {
+  entities: [
+    {
+      name: 'dt_concepts.Customer',
+      fields: [
+        { name: 'id', type: 'integer' },
+        { name: 'name', type: 'string' },
+        { name: 'country', type: 'string' },
+        // Relationships
+        { name: 'orders', type: 'relationship', description: 'One-to-Many relationship to Orders' }
+      ]
+    },
+    {
+      name: 'dt_concepts.Order',
+      fields: [
+        { name: 'id', type: 'integer' },
+        { name: 'amount', type: 'double' },
+        { name: 'order_date', type: 'date' },
+        // Relationships
+        { name: 'customer', type: 'relationship', description: 'Many-to-One relationship to Customer' },
+        { name: 'products', type: 'relationship', description: 'Many-to-Many relationship to Products' }
+      ]
+    },
+    {
+      name: 'dt_concepts.Product',
+      fields: [
+        { name: 'sku', type: 'string' },
+        { name: 'title', type: 'string' },
+        { name: 'price', type: 'double' },
+        { name: 'category', type: 'string' }
       ]
     }
   ]

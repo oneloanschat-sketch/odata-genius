@@ -27,7 +27,8 @@ export interface DashboardWidgetConfig {
   title: string;
   description: string;
   chartType: ChartType;
-  odataQuery: string; // The query string (e.g., /Orders?$select=...)
+  odataQuery: string; // Used for OData
+  sqlQuery?: string;  // Used for BigQuery/SQL
   xAxisKey: string;
   dataKey: string;
   entity: string; // The base entity name for drill-down context

@@ -1,7 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { DatabaseSchema, SchemaEntity, DataPoint } from '../types';
 import { executeODataQuery, fetchEntityCount } from '../services/odataService';
 import { executeLocalQuery } from '../services/fileService';
+import { executeMockSqlQuery } from '../services/mockSqlService';
+import { executeMockTimbrQuery } from '../services/mockTimbrService';
 
 interface DataExplorerModalProps {
   isOpen: boolean;
@@ -11,9 +14,10 @@ interface DataExplorerModalProps {
   username?: string;
   password?: string;
   localData?: DataPoint[];
+  mode: 'odata' | 'file' | 'sql' | 'timbr';
 }
 
-export const DataExplorerModal: React.FC<DataExplorerModalProps> = ({ isOpen, onClose, schema, baseUrl, username, password, localData }) => {
+export const DataExplorerModal: React.FC<DataExplorerModalProps> = ({ isOpen, onClose, schema, baseUrl, username, password, localData, mode }) => {
   const [selectedEntity, setSelectedEntity] = useState<SchemaEntity | null>(null);
   const [data, setData] = useState<DataPoint[]>([]);
   const [totalCount, setTotalCount] = useState<number | null>(null);
@@ -34,11 +38,21 @@ export const DataExplorerModal: React.FC<DataExplorerModalProps> = ({ isOpen, on
         setData([]);
         setTotalCount(null);
         try {
-          if (localData) {
+          if (mode === 'file' && localData) {
             // Local Mode Execution
             const result = executeLocalQuery(localData, `/${selectedEntity.name}?$top=100`);
             setData(result);
             setTotalCount(localData.length);
+          } else if (mode === 'sql') {
+             // SQL Mock Execution
+             const result = await executeMockSqlQuery(`SELECT * FROM ${selectedEntity.name} LIMIT 100`);
+             setData(result);
+             setTotalCount(1000); // Mock count
+          } else if (mode === 'timbr') {
+             // Timbr Mock Execution
+             const result = await executeMockTimbrQuery(`SELECT * FROM ${selectedEntity.name} LIMIT 100`);
+             setData(result);
+             setTotalCount(500); // Mock count
           } else {
             // OData Mode Execution
             const result = await executeODataQuery(baseUrl, `/${selectedEntity.name}?$top=100`, username, password);
@@ -56,7 +70,7 @@ export const DataExplorerModal: React.FC<DataExplorerModalProps> = ({ isOpen, on
       };
       fetchData();
     }
-  }, [selectedEntity, baseUrl, isOpen, username, password, localData]);
+  }, [selectedEntity, baseUrl, isOpen, username, password, localData, mode]);
 
   if (!isOpen) return null;
 
