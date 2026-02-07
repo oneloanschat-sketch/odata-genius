@@ -9,29 +9,34 @@
     <style>
       :root {
         /* OKLCH Palette - Light Mode */
-        --color-surface-100: oklch(100% 0 0);
-        --color-surface-200: oklch(98% 0 0);
-        --color-surface-glass: oklch(100% 0 0 / 0.4);
+        --color-surface-100: oklch(99% 0.01 240);
+        --color-surface-200: oklch(96% 0.01 240);
+        --color-surface-glass: oklch(100% 0 0 / 0.6);
+        --color-border-glass: oklch(0% 0 0 / 0.08);
         
-        --color-primary: oklch(65% 0.22 260);     /* Electric Blue */
-        --color-secondary: oklch(70% 0.18 310);   /* Neon Purple */
-        --color-accent: oklch(75% 0.18 150);      /* Cyber Green */
+        --color-primary: oklch(60% 0.22 260);     /* Deep Electric Blue */
+        --color-secondary: oklch(65% 0.20 310);   /* Vivid Purple */
+        --color-accent: oklch(70% 0.18 150);      /* Fresh Green */
         
         --color-text-main: oklch(20% 0.05 260);
-        --color-text-muted: oklch(55% 0.05 260);
+        --color-text-muted: oklch(50% 0.05 260);
         
-        --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        --card-bg-gradient: linear-gradient(145deg, #ffffff, #f8fafc);
       }
 
       /* Dark Mode overrides */
       @media (prefers-color-scheme: dark) {
         :root {
-          --color-surface-100: oklch(15% 0.05 260);
-          --color-surface-200: oklch(20% 0.05 260);
-          --color-surface-glass: oklch(10% 0.05 260 / 0.4);
+          --color-surface-100: oklch(18% 0.02 260); /* Darker background */
+          --color-surface-200: oklch(25% 0.03 260);
+          --color-surface-glass: oklch(20% 0.03 260 / 0.6); /* Dark glass */
+          --color-border-glass: oklch(100% 0 0 / 0.15); /* White border for contrast */
           
-          --color-text-main: oklch(95% 0.02 260);
-          --color-text-muted: oklch(70% 0.05 260);
+          --color-text-main: oklch(98% 0.01 260);
+          --color-text-muted: oklch(75% 0.02 260);
+          
+          --card-bg-gradient: linear-gradient(145deg, oklch(22% 0.03 260), oklch(18% 0.02 260));
         }
       }
 
@@ -42,7 +47,7 @@
         transition: background-color 0.5s ease;
       }
 
-      /* Mesh Gradient Background Animation */
+      /* Mesh Gradient Background Animation - Subtler in Dark Mode */
       @keyframes mesh-drift {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
@@ -52,18 +57,18 @@
       .mesh-gradient-bg {
         background-color: var(--color-surface-100);
         background-image: 
-          radial-gradient(at 0% 0%, oklch(85% 0.1 260 / 0.4) 0px, transparent 50%),
-          radial-gradient(at 100% 0%, oklch(85% 0.1 310 / 0.4) 0px, transparent 50%),
-          radial-gradient(at 100% 100%, oklch(85% 0.1 150 / 0.2) 0px, transparent 50%);
+          radial-gradient(at 0% 0%, oklch(85% 0.1 260 / 0.3) 0px, transparent 50%),
+          radial-gradient(at 100% 0%, oklch(85% 0.1 310 / 0.3) 0px, transparent 50%),
+          radial-gradient(at 100% 100%, oklch(85% 0.1 150 / 0.15) 0px, transparent 50%);
         background-size: 150% 150%;
         animation: mesh-drift 20s ease infinite;
       }
 
       .dark .mesh-gradient-bg {
          background-image: 
-          radial-gradient(at 0% 0%, oklch(25% 0.1 260 / 0.2) 0px, transparent 50%),
-          radial-gradient(at 100% 0%, oklch(25% 0.1 310 / 0.2) 0px, transparent 50%),
-          radial-gradient(at 100% 100%, oklch(25% 0.1 150 / 0.1) 0px, transparent 50%);
+          radial-gradient(at 0% 0%, oklch(35% 0.15 260 / 0.15) 0px, transparent 50%),
+          radial-gradient(at 100% 0%, oklch(35% 0.15 310 / 0.15) 0px, transparent 50%),
+          radial-gradient(at 100% 100%, oklch(35% 0.1 150 / 0.05) 0px, transparent 50%);
       }
       
       /* Scrollbar Styling */

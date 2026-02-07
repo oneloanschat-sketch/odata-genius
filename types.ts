@@ -1,3 +1,4 @@
+
 // Define the available chart types
 export enum ChartType {
   BAR = 'bar',
@@ -72,6 +73,9 @@ export interface InsightFinding {
 }
 
 export interface AnalysisResult {
+  id: string;          // Unique ID for saving
+  createdAt: string;   // Timestamp
+  sourceEntity: string; // Context for drill-down
   summary: string;
   metrics: InsightMetric[];
   charts: InsightChartData[];

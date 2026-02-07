@@ -11,14 +11,19 @@ interface InsightsModalProps {
   onClose: () => void;
   analysisResult: AnalysisResult | null;
   loading: boolean;
+  onSave?: (result: AnalysisResult) => void;
+  isSaved?: boolean;
+  onDrillDown?: (sourceEntity: string) => void;
 }
 
 // Simple chart renderer for the modal
-const InsightChartRenderer: React.FC<{ chart: InsightChartData }> = ({ chart }) => {
+const InsightChartRenderer: React.FC<{ chart: InsightChartData; onClick?: () => void }> = ({ chart, onClick }) => {
+  const cursorStyle = onClick ? { cursor: 'pointer' } : {};
+
   if (chart.type === 'line') {
     return (
       <ResponsiveContainer width="100%" height={220}>
-        <LineChart data={chart.data}>
+        <LineChart data={chart.data} onClick={onClick} style={cursorStyle}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} />
           <YAxis fontSize={10} axisLine={false} tickLine={false} />
@@ -31,7 +36,7 @@ const InsightChartRenderer: React.FC<{ chart: InsightChartData }> = ({ chart }) 
   if (chart.type === 'pie') {
      return (
       <ResponsiveContainer width="100%" height={220}>
-        <PieChart>
+        <PieChart onClick={onClick} style={cursorStyle}>
           <Pie
             data={chart.data}
             cx="50%"
@@ -53,7 +58,7 @@ const InsightChartRenderer: React.FC<{ chart: InsightChartData }> = ({ chart }) 
   }
   return (
     <ResponsiveContainer width="100%" height={220}>
-      <BarChart data={chart.data}>
+      <BarChart data={chart.data} onClick={onClick} style={cursorStyle}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} />
         <YAxis fontSize={10} axisLine={false} tickLine={false} />
@@ -68,7 +73,9 @@ const InsightChartRenderer: React.FC<{ chart: InsightChartData }> = ({ chart }) 
   );
 };
 
-export const InsightsModal: React.FC<InsightsModalProps> = ({ isOpen, onClose, analysisResult, loading }) => {
+export const InsightsModal: React.FC<InsightsModalProps> = ({ 
+  isOpen, onClose, analysisResult, loading, onSave, isSaved, onDrillDown 
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -95,9 +102,41 @@ export const InsightsModal: React.FC<InsightsModalProps> = ({ isOpen, onClose, a
                 </div>
                 <div>
                     <h2 className="text-xl font-bold text-slate-800 tracking-tight">דו"ח אנליזה חכם</h2>
-                    <p className="text-xs text-slate-500">נוצר על ידי Gemini 2.0 Pro</p>
+                    <p className="text-xs text-slate-500">
+                      {analysisResult?.createdAt 
+                        ? `נוצר ב- ${new Date(analysisResult.createdAt).toLocaleDateString('he-IL')}`
+                        : 'נוצר על ידי Gemini 2.0 Pro'
+                      }
+                    </p>
                 </div>
              </div>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            {analysisResult && onSave && (
+              <button
+                onClick={() => onSave(analysisResult)}
+                disabled={isSaved}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all
+                   ${isSaved 
+                      ? 'bg-green-50 text-green-700 cursor-default' 
+                      : 'bg-slate-900 text-white hover:bg-slate-800 hover:shadow-lg'
+                   }`}
+              >
+                 {isSaved ? (
+                   <>
+                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                     נשמר במועדפים
+                   </>
+                 ) : (
+                   <>
+                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                     שמור דוח
+                   </>
+                 )}
+              </button>
+            )}
           </div>
         </div>
 
@@ -154,13 +193,31 @@ export const InsightsModal: React.FC<InsightsModalProps> = ({ isOpen, onClose, a
                  {/* 3. Charts Row */}
                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                    {analysisResult.charts.map((chart, idx) => (
-                     <div key={idx} className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-                        <div className="mb-6">
-                          <h4 className="font-bold text-slate-800 text-xl">{chart.title}</h4>
-                          <p className="text-sm text-slate-400 mt-1">{chart.description}</p>
+                     <div 
+                        key={idx} 
+                        className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 relative group transition-all hover:shadow-md"
+                     >
+                        <div className="flex justify-between items-start mb-6">
+                            <div>
+                                <h4 className="font-bold text-slate-800 text-xl">{chart.title}</h4>
+                                <p className="text-sm text-slate-400 mt-1">{chart.description}</p>
+                            </div>
+                            {onDrillDown && (
+                                <button 
+                                    onClick={() => onDrillDown(analysisResult.sourceEntity)}
+                                    className="opacity-0 group-hover:opacity-100 bg-blue-50 text-blue-600 p-2 rounded-lg text-xs font-bold transition-all hover:bg-blue-100 flex items-center gap-1"
+                                    title="Drill Down"
+                                >
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                                    חקור נתונים
+                                </button>
+                            )}
                         </div>
                         <div className="h-[300px]">
-                           <InsightChartRenderer chart={chart} />
+                           <InsightChartRenderer 
+                              chart={chart} 
+                              onClick={() => onDrillDown && onDrillDown(analysisResult.sourceEntity)} 
+                           />
                         </div>
                      </div>
                    ))}

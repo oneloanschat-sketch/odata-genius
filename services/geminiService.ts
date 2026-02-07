@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { DashboardWidgetConfig, ChartType, DatabaseSchema, DataPoint, AnalysisResult } from '../types';
 
@@ -197,7 +198,7 @@ export const suggestDashboards = async (schema: DatabaseSchema): Promise<Dashboa
 /**
  * Analyzes raw data sample and schema to generate structured visual insights (KPIs, Charts, Findings).
  */
-export const generateAdvancedInsights = async (schema: DatabaseSchema, dataSample: DataPoint[]): Promise<AnalysisResult> => {
+export const generateAdvancedInsights = async (schema: DatabaseSchema, dataSample: DataPoint[], sourceEntity: string): Promise<AnalysisResult> => {
   
   // Prepare context
   const schemaStr = JSON.stringify(schema);
@@ -205,7 +206,7 @@ export const generateAdvancedInsights = async (schema: DatabaseSchema, dataSampl
 
   const prompt = `
     You are a senior business intelligence analyst.
-    Analyze the provided data sample and schema.
+    Analyze the provided data sample and schema for the entity: "${sourceEntity}".
     
     Generate a structured analysis report in JSON format containing:
     1. 'summary': A brief executive summary in Hebrew (2 sentences).
@@ -283,5 +284,13 @@ export const generateAdvancedInsights = async (schema: DatabaseSchema, dataSampl
 
   if (!response.text) throw new Error("Failed to generate analysis");
   
-  return JSON.parse(response.text);
+  const parsed = JSON.parse(response.text);
+
+  // Return with metadata
+  return {
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+    sourceEntity: sourceEntity,
+    ...parsed
+  };
 };

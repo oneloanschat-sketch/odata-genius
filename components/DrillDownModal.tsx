@@ -33,7 +33,7 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
   const headers = data.length > 0 ? Object.keys(data[0]) : [];
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-50 flex flex-col animate-in slide-in-from-bottom duration-500">
+    <div className="fixed inset-0 z-[110] bg-slate-50 flex flex-col animate-in slide-in-from-bottom duration-500">
       
       {/* Full Screen Header */}
       <div className="flex justify-between items-center px-6 py-4 bg-white border-b border-slate-200 shadow-sm shrink-0">
