@@ -15,6 +15,9 @@ const DEFAULT_ODATA_URL = "https://services.odata.org/V4/Northwind/Northwind.svc
 type ConnectionMode = 'odata' | 'file';
 
 const App: React.FC = () => {
+  // Theme State (Default to true for Dark Mode)
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
   // Connection State
   const [mode, setMode] = useState<ConnectionMode>('odata');
   
@@ -49,6 +52,15 @@ const App: React.FC = () => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isInsightsLoading, setIsInsightsLoading] = useState(false);
   const [savedReports, setSavedReports] = useState<AnalysisResult[]>([]);
+
+  // Toggle Theme Effect
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   // Load favorites from local storage
   useEffect(() => {
@@ -231,6 +243,24 @@ const App: React.FC = () => {
   if (!isConnected) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        
+        {/* Theme Toggle Absolute Position for Landing */}
+        <button 
+           onClick={() => setIsDarkMode(!isDarkMode)}
+           className="absolute top-6 right-6 p-3 rounded-full bg-[var(--color-surface-glass)] border border-[var(--color-border-glass)] text-[var(--color-text-main)] hover:bg-[var(--color-surface-200)] transition-all z-20"
+           title={isDarkMode ? "עבור למצב בהיר" : "עבור למצב כהה"}
+        >
+            {isDarkMode ? (
+               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+               </svg>
+            ) : (
+               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+               </svg>
+            )}
+        </button>
+
         {/* Decorative elements for landing */}
         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[oklch(65%_0.22_260)] blur-[120px] opacity-20 animate-pulse"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[oklch(70%_0.18_310)] blur-[120px] opacity-20"></div>
@@ -242,17 +272,29 @@ const App: React.FC = () => {
           <h1 className="text-3xl font-extrabold text-[var(--color-text-main)] mb-2 tracking-tight">OData Genius</h1>
           <p className="text-[var(--color-text-muted)] mb-8">הדור הבא של ניתוח נתונים ויזואלי</p>
           
-          {/* Tabs */}
-          <div className="flex p-1 bg-white/10 rounded-xl mb-6 border border-white/10">
+          {/* Tabs - Now resets state on switch */}
+          <div className="flex p-1 bg-[var(--color-surface-200)]/50 rounded-xl mb-6 border border-[var(--color-border-glass)]">
              <button 
-                onClick={() => setMode('odata')}
-                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === 'odata' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+                onClick={() => {
+                   setMode('odata');
+                   setIsConnected(false);
+                   setSchema(null);
+                   setWidgets([]);
+                   setFileData([]);
+                }}
+                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === 'odata' ? 'bg-[var(--color-surface-100)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
              >
                API (OData)
              </button>
              <button 
-                onClick={() => setMode('file')}
-                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === 'file' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+                onClick={() => {
+                   setMode('file');
+                   setIsConnected(false);
+                   setSchema(null);
+                   setWidgets([]);
+                   setFileData([]);
+                }}
+                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${mode === 'file' ? 'bg-[var(--color-surface-100)] shadow-sm text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}
              >
                קובץ (Excel/CSV)
              </button>
@@ -266,7 +308,7 @@ const App: React.FC = () => {
                    type="url" 
                    value={baseUrl}
                    onChange={(e) => setBaseUrl(e.target.value)}
-                   className="w-full bg-white/50 border border-white/30 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-slate-400 text-left transition-all"
+                   className="w-full bg-[var(--color-surface-100)]/80 border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-[var(--color-text-muted)]/50 text-left transition-all"
                    dir="ltr"
                    required
                  />
@@ -279,7 +321,7 @@ const App: React.FC = () => {
                      type="text" 
                      value={username}
                      onChange={(e) => setUsername(e.target.value)}
-                     className="w-full bg-white/50 border border-white/30 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-slate-400 text-left transition-all"
+                     className="w-full bg-[var(--color-surface-100)]/80 border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-[var(--color-text-muted)]/50 text-left transition-all"
                      dir="ltr"
                      placeholder="אופציונלי"
                    />
@@ -290,7 +332,7 @@ const App: React.FC = () => {
                      type="password" 
                      value={password}
                      onChange={(e) => setPassword(e.target.value)}
-                     className="w-full bg-white/50 border border-white/30 rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-slate-400 text-left transition-all"
+                     className="w-full bg-[var(--color-surface-100)]/80 border border-[var(--color-border-glass)] rounded-xl p-3 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-[var(--color-text-main)] placeholder-[var(--color-text-muted)]/50 text-left transition-all"
                      dir="ltr"
                      placeholder="אופציונלי"
                    />
@@ -307,14 +349,14 @@ const App: React.FC = () => {
                </button>
             </form>
           ) : (
-            <div className="border-2 border-dashed border-[var(--color-text-muted)]/30 rounded-2xl p-8 flex flex-col items-center justify-center hover:bg-white/20 transition-all cursor-pointer relative group">
+            <div className="border-2 border-dashed border-[var(--color-text-muted)]/30 rounded-2xl p-8 flex flex-col items-center justify-center hover:bg-[var(--color-surface-200)]/30 transition-all cursor-pointer relative group">
                <input 
                  type="file" 
                  onChange={handleFileUpload} 
                  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                  className="absolute inset-0 opacity-0 cursor-pointer"
                />
-               <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+               <div className="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                    </svg>
@@ -349,6 +391,23 @@ const App: React.FC = () => {
                  {mode === 'odata' ? baseUrl : 'קובץ מקומי'}
                </span>
              </div>
+
+             {/* Theme Toggle Button */}
+             <button 
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="p-2.5 rounded-xl bg-[var(--color-surface-200)]/20 hover:bg-[var(--color-surface-200)]/40 border border-[var(--color-border-glass)] text-[var(--color-text-main)] transition-all"
+                title={isDarkMode ? "עבור למצב בהיר" : "עבור למצב כהה"}
+             >
+                {isDarkMode ? (
+                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                   </svg>
+                ) : (
+                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                   </svg>
+                )}
+             </button>
              
              {/* Favorites Button */}
              <button
@@ -486,10 +545,10 @@ const App: React.FC = () => {
       {/* Favorites Modal */}
       {isFavoritesOpen && (
          <div className="fixed inset-0 z-[120] bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
-           <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[80vh] shadow-2xl flex flex-col animate-in scale-95 duration-200">
-              <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                 <h2 className="text-xl font-bold text-slate-800">דוחות שמורים</h2>
-                 <button onClick={() => setIsFavoritesOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+           <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl max-h-[80vh] shadow-2xl flex flex-col animate-in scale-95 duration-200">
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                 <h2 className="text-xl font-bold text-slate-800 dark:text-white">דוחות שמורים</h2>
+                 <button onClick={() => setIsFavoritesOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                     <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                  </button>
               </div>
@@ -502,9 +561,9 @@ const App: React.FC = () => {
                  ) : (
                    <div className="space-y-2">
                      {savedReports.map(report => (
-                       <div key={report.id} onClick={() => handleOpenReport(report)} className="p-4 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 cursor-pointer transition-all flex justify-between items-center group">
+                       <div key={report.id} onClick={() => handleOpenReport(report)} className="p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 cursor-pointer transition-all flex justify-between items-center group">
                           <div>
-                            <div className="font-bold text-slate-800">{new Date(report.createdAt).toLocaleDateString('he-IL')} - {new Date(report.createdAt).toLocaleTimeString('he-IL', {hour: '2-digit', minute:'2-digit'})}</div>
+                            <div className="font-bold text-slate-800 dark:text-white">{new Date(report.createdAt).toLocaleDateString('he-IL')} - {new Date(report.createdAt).toLocaleTimeString('he-IL', {hour: '2-digit', minute:'2-digit'})}</div>
                             <div className="text-sm text-slate-500 line-clamp-1">{report.summary}</div>
                           </div>
                           <button onClick={(e) => handleDeleteReport(report.id, e)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors opacity-0 group-hover:opacity-100">

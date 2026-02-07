@@ -24,7 +24,8 @@ const InsightChartRenderer: React.FC<{ chart: InsightChartData; onClick?: () => 
     borderRadius: '12px', 
     border: '1px solid var(--color-border-glass)', 
     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', 
-    color: 'var(--color-text-main)' 
+    color: 'var(--color-text-main)',
+    zIndex: 50
   };
 
   if (chart.type === 'line') {
@@ -52,12 +53,14 @@ const InsightChartRenderer: React.FC<{ chart: InsightChartData; onClick?: () => 
             outerRadius={70}
             paddingAngle={5}
             dataKey="value"
+            label={{ fill: 'var(--color-text-main)', fontSize: 11, fontWeight: 500 }}
+            labelLine={{ stroke: 'var(--color-text-muted)', strokeWidth: 1 }}
           >
             {chart.data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--color-surface-100)" strokeWidth={2} />
             ))}
           </Pie>
-          <Tooltip contentStyle={commonTooltipStyle} />
+          <Tooltip contentStyle={commonTooltipStyle} itemStyle={{ color: 'var(--color-text-main)' }} />
           <Legend verticalAlign="bottom" iconSize={8} wrapperStyle={{fontSize: '10px', color: 'var(--color-text-muted)'}}/>
         </PieChart>
       </ResponsiveContainer>

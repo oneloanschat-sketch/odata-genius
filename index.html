@@ -1,10 +1,15 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he" dir="rtl" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OData Dashboard Genius</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+      }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap" rel="stylesheet">
     <style>
       :root {
@@ -25,29 +30,27 @@
         --card-bg-gradient: linear-gradient(145deg, #ffffff, #f8fafc);
       }
 
-      /* Dark Mode overrides */
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --color-surface-100: oklch(18% 0.02 260); /* Darker background */
-          --color-surface-200: oklch(25% 0.03 260);
-          --color-surface-glass: oklch(20% 0.03 260 / 0.6); /* Dark glass */
-          --color-border-glass: oklch(100% 0 0 / 0.15); /* White border for contrast */
-          
-          --color-text-main: oklch(98% 0.01 260);
-          --color-text-muted: oklch(75% 0.02 260);
-          
-          --card-bg-gradient: linear-gradient(145deg, oklch(22% 0.03 260), oklch(18% 0.02 260));
-        }
+      /* Dark Mode overrides via class */
+      .dark {
+        --color-surface-100: oklch(18% 0.02 260); /* Darker background */
+        --color-surface-200: oklch(25% 0.03 260);
+        --color-surface-glass: oklch(20% 0.03 260 / 0.6); /* Dark glass */
+        --color-border-glass: oklch(100% 0 0 / 0.15); /* White border for contrast */
+        
+        --color-text-main: oklch(98% 0.01 260);
+        --color-text-muted: oklch(75% 0.02 260);
+        
+        --card-bg-gradient: linear-gradient(145deg, oklch(22% 0.03 260), oklch(18% 0.02 260));
       }
 
       body {
         font-family: 'Heebo', sans-serif;
         background-color: var(--color-surface-100);
         color: var(--color-text-main);
-        transition: background-color 0.5s ease;
+        transition: background-color 0.5s ease, color 0.5s ease;
       }
 
-      /* Mesh Gradient Background Animation - Subtler in Dark Mode */
+      /* Mesh Gradient Background Animation */
       @keyframes mesh-drift {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }

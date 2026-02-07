@@ -140,7 +140,14 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
       );
     }
 
-    const commonTooltipStyle = { backgroundColor: 'var(--color-surface-200)', borderRadius: '8px', border: '1px solid var(--color-border-glass)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', color: 'var(--color-text-main)' };
+    const commonTooltipStyle = { 
+        backgroundColor: 'var(--color-surface-200)', 
+        borderRadius: '8px', 
+        border: '1px solid var(--color-border-glass)', 
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', 
+        color: 'var(--color-text-main)',
+        zIndex: 50
+    };
 
     switch (config.chartType) {
       case ChartType.KPICARD:
@@ -171,12 +178,14 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
                 paddingAngle={4}
                 dataKey={mainKey}
                 nameKey={xKey}
+                label={{ fill: 'var(--color-text-main)', fontSize: 11, fontWeight: 500 }}
+                labelLine={{ stroke: 'var(--color-text-muted)', strokeWidth: 1 }}
               >
                 {processedData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--color-surface-100)" strokeWidth={2} />
                 ))}
               </Pie>
-              <Tooltip contentStyle={commonTooltipStyle} />
+              <Tooltip contentStyle={commonTooltipStyle} itemStyle={{ color: 'var(--color-text-main)' }} />
               <Legend verticalAlign="bottom" height={36} iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: 'var(--color-text-muted)' }}/>
             </PieChart>
           </ResponsiveContainer>
@@ -194,7 +203,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-glass)" />
               <XAxis dataKey={xKey} stroke="var(--color-text-muted)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
               <YAxis stroke="var(--color-text-muted)" fontSize={11} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={commonTooltipStyle} />
+              <Tooltip contentStyle={commonTooltipStyle} itemStyle={{ color: 'var(--color-text-main)' }} />
               <Area type="monotone" dataKey={mainKey} stroke={COLORS[1]} fillOpacity={1} fill={`url(#color-${config.id})`} strokeWidth={3} animationDuration={1000} />
             </AreaChart>
           </ResponsiveContainer>
@@ -207,7 +216,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({ config, baseUrl, usernam
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-glass)" />
               <XAxis dataKey={xKey} stroke="var(--color-text-muted)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
               <YAxis stroke="var(--color-text-muted)" fontSize={11} tickLine={false} axisLine={false} />
-              <Tooltip cursor={{fill: 'var(--color-border-glass)'}} contentStyle={commonTooltipStyle} />
+              <Tooltip cursor={{fill: 'var(--color-border-glass)'}} contentStyle={commonTooltipStyle} itemStyle={{ color: 'var(--color-text-main)' }} />
               <Bar dataKey={mainKey} fill={COLORS[0]} radius={[6, 6, 0, 0]} animationDuration={1000}>
                  {processedData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

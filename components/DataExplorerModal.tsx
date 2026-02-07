@@ -110,7 +110,7 @@ export const DataExplorerModal: React.FC<DataExplorerModalProps> = ({ isOpen, on
           <div className="flex-1 flex flex-col overflow-hidden bg-[var(--color-surface-100)] relative">
             
             {/* Toolbar / Tabs */}
-            <div className="flex items-center justify-between px-8 py-4 bg-[var(--color-surface-glass)] border-b border-[var(--color-border-glass)] sticky top-0 z-10">
+            <div className="flex items-center justify-between px-8 py-4 bg-[var(--color-surface-glass)] border-b border-[var(--color-border-glass)] shrink-0 z-10">
                <div className="flex gap-8">
                  <button 
                    onClick={() => setActiveTab('data')}
@@ -135,10 +135,10 @@ export const DataExplorerModal: React.FC<DataExplorerModalProps> = ({ isOpen, on
                )}
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-auto p-8 relative">
-              {loading ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-[var(--color-surface-100)]/70 backdrop-blur-sm z-20">
+            {/* Content Container - Ensure full height usage */}
+            <div className="flex-1 overflow-hidden p-6 relative flex flex-col">
+              {loading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-[var(--color-surface-100)]/70 backdrop-blur-sm z-20 rounded-2xl">
                    <div className="flex flex-col items-center gap-3">
                       <svg className="animate-spin h-10 w-10 text-[var(--color-primary)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -147,20 +147,19 @@ export const DataExplorerModal: React.FC<DataExplorerModalProps> = ({ isOpen, on
                       <span className="text-sm font-medium text-[var(--color-text-muted)]">טוען נתונים...</span>
                    </div>
                 </div>
-              ) : null}
+              )}
 
               {activeTab === 'data' && (
-                <>
+                <div className="flex-1 flex flex-col overflow-hidden bg-[var(--color-surface-glass)] border border-[var(--color-border-glass)] rounded-2xl shadow-sm">
                   {data.length === 0 && !loading ? (
                     <div className="flex items-center justify-center h-full text-[var(--color-text-muted)]">אין נתונים להצגה בטבלה זו</div>
                   ) : (
-                    <div className="bg-[var(--color-surface-glass)] border border-[var(--color-border-glass)] rounded-2xl shadow-sm overflow-hidden">
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-[var(--color-border-glass)] text-sm text-right">
-                          <thead className="bg-[var(--color-surface-200)]">
+                    <div className="flex-1 overflow-auto">
+                        <table className="min-w-full divide-y divide-[var(--color-border-glass)] text-sm text-right border-collapse">
+                          <thead className="bg-[var(--color-surface-200)] sticky top-0 z-10 ring-1 ring-[var(--color-border-glass)]">
                             <tr>
                               {selectedEntity?.fields.map(field => (
-                                <th key={field.name} className="px-6 py-4 font-bold text-[var(--color-text-muted)] whitespace-nowrap bg-[var(--color-surface-200)] sticky top-0 z-10 border-b border-[var(--color-border-glass)]">
+                                <th key={field.name} className="px-6 py-4 font-bold text-[var(--color-text-muted)] whitespace-nowrap bg-[var(--color-surface-200)] border-b border-[var(--color-border-glass)]">
                                   {field.name}
                                 </th>
                               ))}
@@ -178,30 +177,31 @@ export const DataExplorerModal: React.FC<DataExplorerModalProps> = ({ isOpen, on
                             ))}
                           </tbody>
                         </table>
-                      </div>
                     </div>
                   )}
-                  {data.length > 0 && <div className="mt-4 text-xs text-[var(--color-text-muted)] text-center">* מציג 100 רשומות ראשונות</div>}
-                </>
+                  {data.length > 0 && <div className="p-2 border-t border-[var(--color-border-glass)] text-xs text-[var(--color-text-muted)] text-center bg-[var(--color-surface-200)]">* מציג 100 רשומות ראשונות</div>}
+                </div>
               )}
 
               {activeTab === 'metadata' && selectedEntity && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {selectedEntity.fields.map((field) => (
-                    <div key={field.name} className="bg-[var(--color-surface-glass)] backdrop-blur-md p-6 rounded-2xl border border-[var(--color-border-glass)] hover:border-[var(--color-primary)]/50 hover:shadow-lg transition-all group">
-                      <div className="flex justify-between items-start mb-2">
-                         <div className="font-bold text-[var(--color-text-main)] text-lg group-hover:text-[var(--color-primary)] transition-colors">{field.name}</div>
-                         <div className="text-[10px] font-mono text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2 py-1 rounded uppercase tracking-wider">
-                            {field.type}
-                         </div>
-                      </div>
-                      {field.description ? (
-                         <p className="text-sm text-[var(--color-text-muted)] mt-2 leading-relaxed">{field.description}</p>
-                      ) : (
-                         <p className="text-xs text-[var(--color-text-muted)] italic mt-4 opacity-50">אין תיאור זמין</p>
-                      )}
+                <div className="flex-1 overflow-y-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-6">
+                    {selectedEntity.fields.map((field) => (
+                        <div key={field.name} className="bg-[var(--color-surface-glass)] backdrop-blur-md p-6 rounded-2xl border border-[var(--color-border-glass)] hover:border-[var(--color-primary)]/50 hover:shadow-lg transition-all group h-full">
+                        <div className="flex justify-between items-start mb-2">
+                            <div className="font-bold text-[var(--color-text-main)] text-lg group-hover:text-[var(--color-primary)] transition-colors">{field.name}</div>
+                            <div className="text-[10px] font-mono text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2 py-1 rounded uppercase tracking-wider">
+                                {field.type}
+                            </div>
+                        </div>
+                        {field.description ? (
+                            <p className="text-sm text-[var(--color-text-muted)] mt-2 leading-relaxed">{field.description}</p>
+                        ) : (
+                            <p className="text-xs text-[var(--color-text-muted)] italic mt-4 opacity-50">אין תיאור זמין</p>
+                        )}
+                        </div>
+                    ))}
                     </div>
-                  ))}
                 </div>
               )}
             </div>

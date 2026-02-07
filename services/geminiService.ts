@@ -10,19 +10,20 @@ const getAiClient = () => {
   return new GoogleGenAI({ apiKey });
 };
 
-// Common configuration for the AI model
-const MODEL_ID = "gemini-3-pro-preview";
+// Model Configuration
+const MODEL_PRO = "gemini-3-pro-preview";
+const MODEL_FLASH = "gemini-3-flash-preview";
 
 // Helper to handle API calls with specific error handling for quotas
-const safeGenerateContent = async (params: any) => {
+const safeGenerateContent = async (params: any, modelId: string) => {
     const ai = getAiClient();
     try {
         return await ai.models.generateContent({
-            model: MODEL_ID,
+            model: modelId,
             ...params
         });
     } catch (error: any) {
-        console.error("Gemini API Error:", JSON.stringify(error, null, 2));
+        console.error(`Gemini API Error (${modelId}):`, JSON.stringify(error, null, 2));
         
         const isQuotaError = 
             error.status === 429 || 
@@ -31,7 +32,7 @@ const safeGenerateContent = async (params: any) => {
             (error.error && error.error.code === 429);
 
         if (isQuotaError) {
-             throw new Error("מכסת השימוש ב-AI הגיעה לקצה (שגיאה 429). אנא נסה שוב בעוד דקה.");
+             throw new Error("QUOTA_EXCEEDED");
         }
         throw error;
     }
@@ -101,39 +102,47 @@ export const generateDashboardConfig = async (
     4. Return JSON.
   `;
 
-  const response = await safeGenerateContent({
-    contents: userPrompt,
-    config: {
-      systemInstruction: systemInstruction,
-      responseMimeType: "application/json",
-      thinkingConfig: { thinkingBudget: 2048 }, 
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          title: { type: Type.STRING, description: "Title in Hebrew" },
-          description: { type: Type.STRING, description: "Short description in Hebrew" },
-          chartType: { type: Type.STRING, enum: [ChartType.BAR, ChartType.LINE, ChartType.PIE, ChartType.AREA, ChartType.KPICARD] },
-          odataQuery: { type: Type.STRING, description: "Full OData query path starting with /EntityName, e.g., /Orders?$select=..." },
-          xAxisKey: { type: Type.STRING, description: "JSON key for X Axis" },
-          dataKey: { type: Type.STRING, description: "JSON key for Y Axis" },
-          entity: { type: Type.STRING, description: "The EntitySet name used in the query" }
-        },
-        required: ["title", "description", "chartType", "odataQuery", "xAxisKey", "dataKey", "entity"],
+  try {
+    // Use Flash for standard generation to save quota and improve speed
+    const response = await safeGenerateContent({
+      contents: userPrompt,
+      config: {
+        systemInstruction: systemInstruction,
+        responseMimeType: "application/json",
+        thinkingConfig: { thinkingBudget: 1024 }, 
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            title: { type: Type.STRING, description: "Title in Hebrew" },
+            description: { type: Type.STRING, description: "Short description in Hebrew" },
+            chartType: { type: Type.STRING, enum: [ChartType.BAR, ChartType.LINE, ChartType.PIE, ChartType.AREA, ChartType.KPICARD] },
+            odataQuery: { type: Type.STRING, description: "Full OData query path starting with /EntityName, e.g., /Orders?$select=..." },
+            xAxisKey: { type: Type.STRING, description: "JSON key for X Axis" },
+            dataKey: { type: Type.STRING, description: "JSON key for Y Axis" },
+            entity: { type: Type.STRING, description: "The EntitySet name used in the query" }
+          },
+          required: ["title", "description", "chartType", "odataQuery", "xAxisKey", "dataKey", "entity"],
+        }
       }
-    }
-  });
+    }, MODEL_FLASH);
 
-  if (!response.text) throw new Error("No response from AI");
-  let result = JSON.parse(response.text);
-  
-  // Apply fix to ensure valid URL
-  result = fixODataQuery(result);
+    if (!response.text) throw new Error("No response from AI");
+    let result = JSON.parse(response.text);
+    
+    // Apply fix to ensure valid URL
+    result = fixODataQuery(result);
 
-  return {
-    id: crypto.randomUUID(),
-    ...result,
-    alerts: []
-  };
+    return {
+      id: crypto.randomUUID(),
+      ...result,
+      alerts: []
+    };
+  } catch (error: any) {
+     if (error.message === "QUOTA_EXCEEDED") {
+       throw new Error("מכסת השימוש ב-AI הגיעה לקצה (שגיאה 429). אנא נסה שוב בעוד דקה.");
+     }
+     throw error;
+  }
 };
 
 export const suggestDashboards = async (schema: DatabaseSchema): Promise<DashboardWidgetConfig[]> => {
@@ -153,46 +162,54 @@ export const suggestDashboards = async (schema: DatabaseSchema): Promise<Dashboa
     Schema: ${schemaContext}
   `;
 
-  const response = await safeGenerateContent({
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      thinkingConfig: { thinkingBudget: 2048 },
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          suggestions: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                title: { type: Type.STRING },
-                description: { type: Type.STRING },
-                chartType: { type: Type.STRING, enum: [ChartType.BAR, ChartType.LINE, ChartType.PIE, ChartType.AREA, ChartType.KPICARD] },
-                odataQuery: { type: Type.STRING, description: "Full OData query path starting with /EntityName" },
-                xAxisKey: { type: Type.STRING },
-                dataKey: { type: Type.STRING },
-                entity: { type: Type.STRING }
-              },
-              required: ["title", "description", "chartType", "odataQuery", "xAxisKey", "dataKey", "entity"]
+  try {
+    // Use Flash for suggestions
+    const response = await safeGenerateContent({
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        thinkingConfig: { thinkingBudget: 2048 },
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            suggestions: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING },
+                  description: { type: Type.STRING },
+                  chartType: { type: Type.STRING, enum: [ChartType.BAR, ChartType.LINE, ChartType.PIE, ChartType.AREA, ChartType.KPICARD] },
+                  odataQuery: { type: Type.STRING, description: "Full OData query path starting with /EntityName" },
+                  xAxisKey: { type: Type.STRING },
+                  dataKey: { type: Type.STRING },
+                  entity: { type: Type.STRING }
+                },
+                required: ["title", "description", "chartType", "odataQuery", "xAxisKey", "dataKey", "entity"]
+              }
             }
           }
         }
       }
-    }
-  });
+    }, MODEL_FLASH);
 
-  if (!response.text) throw new Error("No response");
-  const result = JSON.parse(response.text);
-  
-  return result.suggestions.map((s: any) => {
-    const fixed = fixODataQuery(s);
-    return {
-      id: crypto.randomUUID(),
-      ...fixed,
-      alerts: []
-    };
-  });
+    if (!response.text) throw new Error("No response");
+    const result = JSON.parse(response.text);
+    
+    return result.suggestions.map((s: any) => {
+      const fixed = fixODataQuery(s);
+      return {
+        id: crypto.randomUUID(),
+        ...fixed,
+        alerts: []
+      };
+    });
+  } catch (error: any) {
+    if (error.message === "QUOTA_EXCEEDED") {
+      throw new Error("מכסת השימוש ב-AI הגיעה לקצה (שגיאה 429). אנא נסה שוב בעוד דקה.");
+    }
+    throw error;
+  }
 };
 
 /**
@@ -220,69 +237,85 @@ export const generateAdvancedInsights = async (schema: DatabaseSchema, dataSampl
     Data Sample: ${dataStr}
   `;
 
-  const response = await safeGenerateContent({
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          summary: { type: Type.STRING },
-          metrics: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                label: { type: Type.STRING },
-                value: { type: Type.STRING },
-                change: { type: Type.STRING, description: "e.g. +12% or 'Stable'" },
-                trend: { type: Type.STRING, enum: ['up', 'down', 'neutral'] }
-              },
-              required: ['label', 'value', 'trend']
-            }
-          },
-          charts: {
-             type: Type.ARRAY,
-             items: {
-               type: Type.OBJECT,
-               properties: {
-                 title: { type: Type.STRING },
-                 type: { type: Type.STRING, enum: ['bar', 'line', 'pie'] },
-                 description: { type: Type.STRING },
-                 data: {
-                   type: Type.ARRAY,
-                   items: {
-                     type: Type.OBJECT,
-                     properties: {
-                       name: { type: Type.STRING },
-                       value: { type: Type.NUMBER }
-                     },
-                     required: ['name', 'value']
-                   }
-                 }
-               },
-               required: ['title', 'type', 'data']
-             }
-          },
-          findings: {
-            type: Type.ARRAY,
-            items: {
-               type: Type.OBJECT,
-               properties: {
-                 title: { type: Type.STRING },
-                 description: { type: Type.STRING },
-                 severity: { type: Type.STRING, enum: ['high', 'medium', 'low'] }
-               },
-               required: ['title', 'description', 'severity']
-            }
+  const config = {
+    responseMimeType: "application/json",
+    responseSchema: {
+      type: Type.OBJECT,
+      properties: {
+        summary: { type: Type.STRING },
+        metrics: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              label: { type: Type.STRING },
+              value: { type: Type.STRING },
+              change: { type: Type.STRING, description: "e.g. +12% or 'Stable'" },
+              trend: { type: Type.STRING, enum: ['up', 'down', 'neutral'] }
+            },
+            required: ['label', 'value', 'trend']
           }
         },
-        required: ['summary', 'metrics', 'charts', 'findings']
-      }
+        charts: {
+           type: Type.ARRAY,
+           items: {
+             type: Type.OBJECT,
+             properties: {
+               title: { type: Type.STRING },
+               type: { type: Type.STRING, enum: ['bar', 'line', 'pie'] },
+               description: { type: Type.STRING },
+               data: {
+                 type: Type.ARRAY,
+                 items: {
+                   type: Type.OBJECT,
+                   properties: {
+                     name: { type: Type.STRING },
+                     value: { type: Type.NUMBER }
+                   },
+                   required: ['name', 'value']
+                 }
+               }
+             },
+             required: ['title', 'type', 'data']
+           }
+        },
+        findings: {
+          type: Type.ARRAY,
+          items: {
+             type: Type.OBJECT,
+             properties: {
+               title: { type: Type.STRING },
+               description: { type: Type.STRING },
+               severity: { type: Type.STRING, enum: ['high', 'medium', 'low'] }
+             },
+             required: ['title', 'description', 'severity']
+          }
+        }
+      },
+      required: ['summary', 'metrics', 'charts', 'findings']
     }
-  });
+  };
 
-  if (!response.text) throw new Error("Failed to generate analysis");
+  let response;
+
+  try {
+    // 1. Use FLASH directly to avoid 429 quota issues with PRO
+    response = await safeGenerateContent({
+      contents: prompt,
+      config: {
+        ...config,
+        thinkingConfig: { thinkingBudget: 2048 }
+      }
+    }, MODEL_FLASH);
+
+  } catch (error: any) {
+    if (error.message === "QUOTA_EXCEEDED") {
+         throw new Error("מכסת השימוש ב-AI הגיעה לקצה (שגיאה 429). אנא נסה שוב בעוד דקה.");
+    }
+    throw error;
+  }
+
+  if (!response?.text) throw new Error("Failed to generate analysis");
   
   const parsed = JSON.parse(response.text);
 
